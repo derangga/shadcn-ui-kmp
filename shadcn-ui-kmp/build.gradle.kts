@@ -19,7 +19,7 @@ kotlin {
     androidLibrary {
         namespace = "com.shadcn.ui.kmp"
         compileSdk = 36
-        minSdk = 26
+        minSdk = 24
 
         withHostTestBuilder {
         }
@@ -120,7 +120,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.derangga",
         artifactId = "shadcn-ui-kmp",
-        version = "0.1.0"
+        version = "0.2.0"
     )
 
     // Configure POM metadata for the published artifact
