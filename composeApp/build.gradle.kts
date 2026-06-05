@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -7,11 +9,30 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+@OptIn(ExperimentalWasmDsl::class)
 kotlin {
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
+    }
+
+    jvm("desktop") {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
+
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "composeApp.js"
+                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    static("$projectDir/src/wasmJsMain/resources", watch = true)
+                }
+            }
+        }
+        binaries.executable()
     }
     
     listOf(
@@ -21,6 +42,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            binaryOption("bundleId", "com.komoui.demo")
         }
     }
     
@@ -28,6 +50,16 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.datastore.lib)
+            implementation(libs.androidx.datastore.prefs)
+        }
+        getByName("desktopMain") {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.kotlinx.coroutines.swing)
+                implementation(libs.androidx.datastore.lib)
+                implementation(libs.androidx.datastore.prefs)
+            }
         }
         commonMain.dependencies {
             implementation(libs.runtime)
@@ -47,12 +79,15 @@ kotlin {
             implementation(libs.androidx.material.icons.extended)
             implementation(libs.androidx.compose.navigation)
 
-            implementation(libs.androidx.datastore.lib)
-            implementation(libs.androidx.datastore.prefs)
-
             implementation(libs.kotlin.datetime)
         }
         iosMain.dependencies {
+            implementation(libs.androidx.datastore.lib)
+            implementation(libs.androidx.datastore.prefs)
+        }
+        getByName("wasmJsMain") {
+            dependencies {
+            }
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -91,3 +126,8 @@ dependencies {
     debugImplementation(compose.uiTooling)
 }
 
+compose.desktop {
+    application {
+        mainClass = "com.komoui.demo.MainKt"
+    }
+}

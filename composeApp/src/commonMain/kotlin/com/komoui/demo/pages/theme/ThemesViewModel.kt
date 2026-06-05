@@ -1,25 +1,23 @@
 package com.komoui.demo.pages.theme
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.komoui.demo.themes.AppPreferences
 import com.komoui.demo.themes.ThemeEvent
 import com.komoui.demo.themes.ThemeProvider
 import com.komoui.demo.themes.getStyles
-import com.komoui.demo.themes.setStyles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class ThemesViewModel(private val prefs: DataStore<Preferences>) : ViewModel() {
+class ThemesViewModel(private val prefs: AppPreferences) : ViewModel() {
     private val _uiState = MutableStateFlow(UIState())
     val uiState: StateFlow<UIState> = _uiState
 
     init {
         viewModelScope.launch {
-            val initialStyle = prefs.getStyles().first()
+            val initialStyle = prefs.styles.first()
             _uiState.value = _uiState.value.copy(selected = initialStyle)
         }
     }

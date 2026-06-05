@@ -16,8 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.compose.rememberNavController
 import com.komoui.components.sooner.ObserveAsEvent
 import com.komoui.components.sooner.SonnerHost
@@ -27,6 +25,7 @@ import com.komoui.themes.KomoTheme
 import com.komoui.demo.navigation.AppNavigation
 import com.komoui.demo.themes.ThemeEvent
 import com.komoui.demo.themes.ThemeObserver
+import com.komoui.demo.themes.AppPreferences
 import com.komoui.demo.themes.ThemeProvider
 import com.komoui.demo.themes.getStyles
 import com.komoui.demo.themes.isDarkTheme
@@ -34,10 +33,10 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun App(
-    preferences: DataStore<Preferences>
+    preferences: AppPreferences
 ) {
     val systemTheme = isSystemInDarkTheme()
-    val localStyles by preferences.getStyles().collectAsState(initial = "Default")
+    val localStyles by preferences.styles.collectAsState(initial = "Default")
 
     var isDarkMode by remember { mutableStateOf(false) }
     var styles by remember { mutableStateOf(getStyles()) }

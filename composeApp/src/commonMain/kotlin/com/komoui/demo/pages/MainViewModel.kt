@@ -1,14 +1,12 @@
 package com.komoui.demo.pages
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.komoui.demo.Content
 import com.komoui.demo.HomeContent
+import com.komoui.demo.themes.AppPreferences
 import com.komoui.demo.themes.ThemeEvent
 import com.komoui.demo.themes.ThemeProvider
-import com.komoui.demo.themes.setTheme
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +17,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
 @OptIn(FlowPreview::class)
-class MainViewModel(val prefs: DataStore<Preferences>): ViewModel() {
+class MainViewModel(val prefs: AppPreferences): ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 

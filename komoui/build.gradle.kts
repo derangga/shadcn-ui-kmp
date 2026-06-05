@@ -1,4 +1,7 @@
 import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -11,6 +14,15 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
+configurations.matching {
+    it.name == "desktopMainCompileClasspath" || it.name == "desktopMainRuntimeClasspath"
+}.configureEach {
+    attributes {
+        attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm)
+    }
+}
+
+@OptIn(ExperimentalWasmDsl::class)
 kotlin {
 
     // Target declarations - add or remove as needed below. These define
@@ -31,6 +43,16 @@ kotlin {
         }
     }
 
+    jvm("desktop") {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
+
+    wasmJs {
+        browser()
+    }
+
     // For iOS targets, this is also where you should
     // configure native binary output. For more information, see:
     // https://kotlinlang.org/docs/multiplatform-build-native-binaries.html#build-xcframeworks
@@ -43,18 +65,21 @@ kotlin {
     iosX64 {
         binaries.framework {
             baseName = xcfName
+            binaryOption("bundleId", "com.komoui")
         }
     }
 
     iosArm64 {
         binaries.framework {
             baseName = xcfName
+            binaryOption("bundleId", "com.komoui")
         }
     }
 
     iosSimulatorArm64 {
         binaries.framework {
             baseName = xcfName
+            binaryOption("bundleId", "com.komoui")
         }
     }
 
@@ -81,7 +106,8 @@ kotlin {
 
             implementation(libs.kotlin.datetime)
 
-            implementation(libs.androidx.material.icons.extended)
+            implementation(compose.materialIconsExtended)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
         }
 
         commonTest.dependencies {
@@ -93,6 +119,13 @@ kotlin {
             // commonMain by default and will correctly pull the Android artifacts of any KMP
             // dependencies declared in commonMain.
             implementation(libs.ktor.client.android)
+        }
+
+        getByName("desktopMain") {
+            dependencies {
+                implementation(libs.kotlinx.coroutines.swing)
+                implementation(libs.ktor.client.cio)
+            }
         }
 
         getByName("androidDeviceTest") {
@@ -112,6 +145,12 @@ kotlin {
             implementation(libs.ktor.client.darwin)
             implementation(libs.kotlin.datetime)
         }
+
+        getByName("wasmJsMain") {
+            dependencies {
+                implementation(libs.ktor.client.js)
+            }
+        }
     }
 }
 
@@ -126,7 +165,7 @@ mavenPublishing {
     // Configure POM metadata for the published artifact
     pom {
         name.set("KomoUI")
-        description.set("Compose Multiplatform UI components for Android and iOS, inspired by the design language of shadcn/ui.")
+        description.set("Compose Multiplatform UI components for Android, iOS, desktop, and web, inspired by the design language of shadcn/ui.")
         inceptionYear.set("2025")
         url.set("https://github.com/derangga/komoui")
 

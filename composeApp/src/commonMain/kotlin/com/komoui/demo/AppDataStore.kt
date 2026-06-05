@@ -1,13 +1,8 @@
 package com.komoui.demo
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
-import androidx.datastore.preferences.core.Preferences
-import okio.Path.Companion.toPath
+import com.komoui.demo.themes.AppPreferences
+import com.komoui.demo.themes.InMemoryAppPreferences
 
-fun createDataStore(producePath: () -> String): DataStore<Preferences> =
-    PreferenceDataStoreFactory.createWithPath(
-        produceFile = { producePath().toPath() }
-    )
+fun createInMemoryPreferences(): AppPreferences = InMemoryAppPreferences()
 
 internal const val DATA_STORE_FILE_NAME = "themes.preferences_pb"

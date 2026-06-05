@@ -2,8 +2,6 @@ package com.komoui.demo.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -11,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.komoui.demo.TopLevelRoute
+import com.komoui.demo.themes.AppPreferences
 import com.komoui.demo.pages.MainLayout
 import com.komoui.demo.pages.MainViewModel
 import com.komoui.demo.pages.components.SidebarFloatingPage
@@ -21,7 +20,7 @@ import com.komoui.demo.pages.components.SidebarOffcanvasPage
 @Composable
 fun AppNavigation(
     navController: NavHostController,
-    prefs: DataStore<Preferences>,
+    prefs: AppPreferences,
     modifier: Modifier,
     isDark: Boolean
 ) {

@@ -2,8 +2,6 @@ package com.komoui.demo.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -45,12 +43,13 @@ import com.komoui.demo.pages.components.TabsPage
 import com.komoui.demo.pages.home.HomePage
 import com.komoui.demo.pages.theme.ThemesPage
 import com.komoui.demo.pages.theme.ThemesViewModel
+import com.komoui.demo.themes.AppPreferences
 
 @Composable
 fun ComponentNavigation(
     parentNav: NavHostController,
     childNav: NavHostController,
-    prefs: DataStore<Preferences>,
+    prefs: AppPreferences,
     modifier: Modifier,
 ) {
     NavHost(
