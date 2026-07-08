@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -108,8 +107,13 @@ class SidebarState internal constructor(
     internal fun setOpenMobile(open: Boolean) = onOpenMobileChange(open)
 }
 
-/** Provides the active [SidebarState]. Throws when used outside a [SidebarProvider]. */
-val LocalSidebarState = staticCompositionLocalOf<SidebarState> {
+/**
+ * Provides the active [SidebarState]. Throws when used outside a [SidebarProvider].
+ *
+ * Read-tracking (`compositionLocalOf`, not `staticCompositionLocalOf`): a new state on
+ * toggle recomposes only the composables that actually read it, not the whole subtree.
+ */
+val LocalSidebarState = compositionLocalOf<SidebarState> {
     error("SidebarState not provided. Wrap your content in SidebarProvider.")
 }
 
