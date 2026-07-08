@@ -11,8 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.komoui.components.Button
 import com.komoui.components.ButtonVariant
-import com.komoui.components.sooner.SonnerAction
-import com.komoui.components.sooner.SonnerProvider
+import com.komoui.components.sonner.SonnerAction
+import com.komoui.components.sonner.SonnerProvider
 import com.komoui.demo.components.ContentPageWithTitle
 import com.komoui.demo.components.Layout
 import kotlinx.coroutines.launch

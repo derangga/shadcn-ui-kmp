@@ -1,4 +1,4 @@
-package com.komoui.components.sooner
+package com.komoui.components.sonner
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState

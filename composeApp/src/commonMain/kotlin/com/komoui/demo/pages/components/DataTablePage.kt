@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.komoui.components.DataTable
 import com.komoui.components.DataTableColumn
-import com.komoui.components.sooner.SonnerProvider
+import com.komoui.components.sonner.SonnerProvider
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import com.komoui.demo.components.ContentPageWithTitle

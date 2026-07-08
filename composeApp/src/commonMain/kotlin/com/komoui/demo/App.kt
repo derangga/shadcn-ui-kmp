@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.compose.rememberNavController
-import com.komoui.components.sooner.ObserveAsEvent
-import com.komoui.components.sooner.SonnerHost
-import com.komoui.components.sooner.SonnerProvider
-import com.komoui.components.sooner.showSonner
+import com.komoui.components.sonner.ObserveAsEvent
+import com.komoui.components.sonner.SonnerHost
+import com.komoui.components.sonner.SonnerProvider
+import com.komoui.components.sonner.showSonner
 import com.komoui.themes.KomoTheme
 import com.komoui.demo.navigation.AppNavigation
 import com.komoui.demo.themes.ThemeEvent

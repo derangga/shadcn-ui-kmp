@@ -1,4 +1,4 @@
-package com.komoui.components.sooner
+package com.komoui.components.sonner
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
