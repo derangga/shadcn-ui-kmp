@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonColors
@@ -24,36 +25,47 @@ import androidx.compose.ui.unit.sp
 import com.komoui.themes.styles
 
 /**
+ * Scope exposed to a [RadioGroup]'s content. Carries the group's current selection
+ * so child [RadioButtonWithLabel]s stay in sync without re-passing selection state.
+ */
+class RadioGroupScope<T> internal constructor(
+    val selectedValue: T,
+    val onValueChange: (T) -> Unit
+)
+
+/**
  * A Jetpack Compose Radio Group component for KomoUI.
- * It manages the selection state for a group of [RadioButtonWithLabel]s.
+ * It owns the selection state for a group of [RadioButtonWithLabel]s and exposes it
+ * to children via [RadioGroupScope]. The container is marked as a mutually-exclusive
+ * selectable group for accessibility.
  *
  * @param selectedValue The currently selected value in the group.
  * @param onValueChange Callback invoked when the selection changes. Provides the new selected value.
  * @param modifier The modifier to be applied to the radio group container.
- * @param content The composable content representing the radio buttons and their labels.
- * Each radio button should be wrapped in a selectable row with its label.
  * @param orientation The orientation of the radio group (horizontal or vertical).
+ * @param content The radio buttons, typically [RadioButtonWithLabel]s, composed within [RadioGroupScope].
  */
 @Composable
 fun <T> RadioGroup(
     selectedValue: T,
     onValueChange: (T) -> Unit,
     modifier: Modifier = Modifier,
-    orientation: LayoutOrientation = LayoutOrientation.Vertical, // New parameter for orientation
-    content: @Composable () -> Unit
+    orientation: LayoutOrientation = LayoutOrientation.Vertical,
+    content: @Composable RadioGroupScope<T>.() -> Unit
 ) {
+    val scope = RadioGroupScope(selectedValue, onValueChange)
     when (orientation) {
         LayoutOrientation.Vertical -> Column(
-            modifier = modifier,
+            modifier = modifier.selectableGroup(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            content()
+            scope.content()
         }
         LayoutOrientation.Horizontal -> Row(
-            modifier = modifier,
+            modifier = modifier.selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            content()
+            scope.content()
         }
     }
 }
@@ -68,22 +80,19 @@ enum class LayoutOrientation {
 
 /**
  * A convenience composable to combine a native [RadioButton] with a [Text] label,
- * with the KomoUI design tokens. This should be used as a child within a [RadioGroup].
+ * with the KomoUI design tokens. Must be composed within a [RadioGroup]'s content,
+ * from which it reads the current selection and reports changes.
  *
  * @param value The value associated with this radio button.
  * @param label The text label for this radio button.
- * @param selectedValue The currently selected value of the parent group.
- * @param onValueChange The callback for when this radio button is selected.
  * @param modifier The modifier to be applied to the row containing the radio button and label.
  * @param enabled Controls the enabled state of the radio button and label.
  * @param colors Optional custom colors for the radio button and label.
  */
 @Composable
-fun <T> RadioButtonWithLabel(
+fun <T> RadioGroupScope<T>.RadioButtonWithLabel(
     value: T,
     label: String,
-    selectedValue: T,
-    onValueChange: (T) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     colors: RadioButtonColors? = null
