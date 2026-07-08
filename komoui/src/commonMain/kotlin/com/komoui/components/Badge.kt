@@ -41,16 +41,20 @@ enum class BadgeVariant {
  *   See [BadgeVariant] for available options. Defaults to [BadgeVariant.Default].
  * @param backgroundColor Optional explicit background color for the badge. If null, the color is
  *   determined by the selected [variant] and the current theme.
+ * @param contentColor Optional explicit content (text/icon) color. If null, it is determined by the
+ *   selected [variant] — set this when supplying a custom [backgroundColor] to keep text readable.
  * @param roundedSize The corner radius for the badge's shape. Defaults to a fully rounded shape
  *   (e.g., `Radius.full` which might correspond to `CircleShape` or a large Dp value).
- * @param content A composable lambda defining the content to be displayed inside the badge.
- *   Typically this will be a [androidx.compose.material3.Text] composable.
+ * @param content A composable lambda defining the content to be displayed inside the badge. When
+ *   null the badge renders as a small dot. Typically this will be a
+ *   [androidx.compose.material3.Text] composable.
  */
 @Composable
 fun Badge(
     modifier: Modifier = Modifier,
     variant: BadgeVariant = BadgeVariant.Default,
     backgroundColor: Color? = null,
+    contentColor: Color? = null,
     roundedSize: Dp = MaterialTheme.radius.full,
     content: (@Composable () -> Unit)? = null
 ) {
@@ -63,7 +67,7 @@ fun Badge(
         BadgeVariant.Outline -> styles.background
     }
 
-    val contentColor = when (variant) {
+    val resolvedContentColor = contentColor ?: when (variant) {
         BadgeVariant.Default -> styles.primaryForeground
         BadgeVariant.Secondary -> styles.secondaryForeground
         BadgeVariant.Destructive -> styles.destructiveForeground
@@ -77,22 +81,12 @@ fun Badge(
 
     val size = if (content != null) 16.dp else 6.dp
 
-    val shape = if (content != null) {
-        RoundedCornerShape(roundedSize)
-    } else {
-        CircleShape
-    }
-
-    val borderShape = if (content != null) {
-        RoundedCornerShape(roundedSize)
-    } else {
-        CircleShape
-    }
+    val shape = if (content != null) RoundedCornerShape(roundedSize) else CircleShape
 
     Box(
         modifier = modifier
             .defaultMinSize(minWidth = size, minHeight = size)
-            .background(containerColor, borderShape)
+            .background(containerColor, shape)
             .then(borderStroke?.let { Modifier.border(it, shape) }
                 ?: Modifier) // Apply border if it exists
             .then(
@@ -105,7 +99,7 @@ fun Badge(
         if (content != null) {
             ProvideTextStyle(
                 value = TextStyle(
-                    color = contentColor,
+                    color = resolvedContentColor,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
                     lineHeight = 16.sp

@@ -18,6 +18,15 @@ import androidx.compose.ui.unit.dp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
+/**
+ * A determinate linear progress bar.
+ *
+ * @param progress Completion fraction in 0..1 (values outside are coerced). Changes animate.
+ * @param modifier The modifier to be applied to the progress bar container.
+ * @param height The thickness of the bar.
+ * @param trackColor The color of the unfilled track.
+ * @param indicatorColor The color of the filled portion.
+ */
 @Composable
 fun Progress(
     progress: Float,

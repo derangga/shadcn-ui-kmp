@@ -27,12 +27,12 @@ enum class AlertVariant {
 }
 
 /**
- * Displays a short, important message to the user.
+ * A short, important message.
  *
  * @param modifier The modifier to be applied to the alert container.
  * @param variant The visual style of the alert (Default or Destructive).
- * @param colors that will be used to resolve the colors used for this alert in
- *   different states. See [AlertDefaults.colors].
+ * @param colors The [AlertStyle] resolving the alert's colors. Defaults to
+ *   [AlertDefaults.colors] for [variant]; a caller-supplied value overrides the variant defaults.
  * @param icon Optional icon to display at the start of the alert.
  * @param title The composable content for the alert's title.
  * @param description The composable content for the alert's description.
@@ -41,21 +41,15 @@ enum class AlertVariant {
 fun Alert(
     modifier: Modifier = Modifier,
     variant: AlertVariant = AlertVariant.Default,
-    colors: AlertStyle = AlertDefaults.colors(),
+    colors: AlertStyle = AlertDefaults.colors(variant),
     icon: (@Composable () -> Unit)? = null,
     title: @Composable () -> Unit,
     description: @Composable () -> Unit
 ) {
     val radius = MaterialTheme.radius
-    val titleColor = when (variant) {
-        AlertVariant.Default -> colors.titleColor
-        AlertVariant.Destructive -> MaterialTheme.styles.destructive
-    }
-
-    val descriptionColor = when (variant) {
-        AlertVariant.Default -> colors.descriptionColor
-        AlertVariant.Destructive -> MaterialTheme.styles.destructive.copy(alpha = 0.8f)
-    }
+    // Variant defaults live in AlertDefaults.colors(variant); a caller-supplied AlertStyle wins.
+    val titleColor = colors.titleColor
+    val descriptionColor = colors.descriptionColor
 
     Row(
         modifier = modifier
@@ -101,15 +95,25 @@ data class AlertStyle(
     val descriptionColor: Color
 )
 
+/** Default [AlertStyle]s for [Alert], per [AlertVariant]. */
 object AlertDefaults {
+    /** Theme-derived colors for the given [variant]. Caller overrides take precedence. */
     @Composable
-    fun colors(): AlertStyle {
+    fun colors(variant: AlertVariant = AlertVariant.Default): AlertStyle {
         val styles = MaterialTheme.styles
-        return AlertStyle(
-            borderColors = styles.border,
-            backgroundColor = styles.background,
-            titleColor = styles.foreground,
-            descriptionColor = styles.mutedForeground
-        )
+        return when (variant) {
+            AlertVariant.Default -> AlertStyle(
+                borderColors = styles.border,
+                backgroundColor = styles.background,
+                titleColor = styles.foreground,
+                descriptionColor = styles.mutedForeground
+            )
+            AlertVariant.Destructive -> AlertStyle(
+                borderColors = styles.destructive,
+                backgroundColor = styles.background,
+                titleColor = styles.destructive,
+                descriptionColor = styles.destructive.copy(alpha = 0.8f)
+            )
+        }
     }
 }

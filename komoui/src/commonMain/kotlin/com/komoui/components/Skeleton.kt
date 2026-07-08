@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 import com.komoui.themes.radius
@@ -29,16 +30,16 @@ import com.komoui.themes.styles
  * Displays a placeholder loading state with a shimmer effect.
  *
  * @param modifier The modifier to be applied to the skeleton container.
- * @param shape The shape of the skeleton. Defaults to `RoundedCornerShape(Radius.md)`.
+ * @param shape The [Shape] of the skeleton (e.g. `CircleShape` for avatars). Defaults to `RoundedCornerShape(radius.md)`.
  * @param baseColor The base background color of the skeleton. Defaults to `MaterialTheme.styles.muted`.
- * @param shimmerColor The color of the shimmering highlight. Defaults to `MaterialTheme.styles.background.copy(alpha = 0.8f)`.
+ * @param shimmerColor The color of the shimmering highlight. Defaults to `MaterialTheme.styles.muted.copy(alpha = 0.5f)`.
  * @param animationDurationMillis The duration of one shimmer cycle in milliseconds.
  * @param gradientWidthRatio The ratio of the shimmer gradient's width to the skeleton's width.
  */
 @Composable
 fun Skeleton(
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(MaterialTheme.radius.md),
+    shape: Shape = RoundedCornerShape(MaterialTheme.radius.md),
     baseColor: Color = MaterialTheme.styles.muted,
     shimmerColor: Color = MaterialTheme.styles.muted.copy(alpha = 0.5f),
     animationDurationMillis: Int = 1500,
