@@ -116,7 +116,9 @@ fun Input(
 
     val placeholderColor = colors.placeholder
     val borderStyle = when (variant) {
-        InputVariant.Outlined -> Modifier.border(1.dp, borderColor, RoundedCornerShape(radius.md))
+        InputVariant.Outlined -> Modifier
+            .background(backgroundColor, RoundedCornerShape(radius.md))
+            .border(1.dp, borderColor, RoundedCornerShape(radius.md))
         InputVariant.Underlined -> Modifier.drawBehind {
             val strokeWidth = 1.dp.toPx()
             val y = size.height - strokeWidth / 2
@@ -130,15 +132,16 @@ fun Input(
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(modifier)
     ) {
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 44.dp)
-                .background(backgroundColor, RoundedCornerShape(radius.md))
                 .then(borderStyle),
             enabled = enabled,
             readOnly = readOnly,
@@ -174,7 +177,7 @@ fun Input(
                         modifier = Modifier.weight(1f),
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        if (value.isEmpty() && !isFocused) {
+                        if (value.isEmpty()) {
                             Text(
                                 text = placeholder,
                                 style = TextStyle(
@@ -246,22 +249,7 @@ object InputDefaults {
     }
 
     @Composable
-    fun colors(): InputStyle {
-        val styles = MaterialTheme.styles
-        return InputStyle(
-            background = Color.Unspecified,
-            disableBackground = styles.muted,
-            text = styles.foreground,
-            disableText = styles.mutedForeground,
-            placeholder = styles.mutedForeground.copy(alpha = 0.5f),
-            border = InputBorderStyle(
-                default = styles.input,
-                error = styles.destructive,
-                focus = styles.ring
-            ),
-            supportingText = styles.mutedForeground
-        )
-    }
+    fun colors(): InputStyle = colorsFrom(MaterialTheme.styles)
 
     @Composable
     fun colors(overrides: InputStyle.() -> InputStyle): InputStyle {
