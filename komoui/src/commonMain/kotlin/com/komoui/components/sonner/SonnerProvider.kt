@@ -41,7 +41,9 @@ data class SonnerAction(
  * Use [showMessage] for informational notifications and [showError] for error/destructive notifications.
  */
 object SonnerProvider {
-    private val _events = Channel<SonnerEvent>()
+    // Buffered so show* callers don't suspend indefinitely when no host is
+    // collecting (e.g. app backgrounded and repeatOnLifecycle cancelled collection).
+    private val _events = Channel<SonnerEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     private suspend fun show(

@@ -43,11 +43,13 @@ data class SonnerVisualsImpl(
  *
  * Converts a [SonnerEvent] into [SonnerVisualsImpl] and shows it using the host state.
  *
+ * When the user taps the action button, the event's [SonnerAction.execute] callback is invoked.
+ *
  * @param event The [SonnerEvent] containing the message, variant, and action configuration.
  * @return The [SnackbarResult] indicating whether the snackbar was dismissed or the action was performed.
  */
 suspend fun SnackbarHostState.showSonner(event: SonnerEvent): SnackbarResult {
-    return showSnackbar(SonnerVisualsImpl(
+    val result = showSnackbar(SonnerVisualsImpl(
         message = event.message,
         subMessage = event.subMessage,
         actionLabel = event.action?.actionText,
@@ -55,4 +57,8 @@ suspend fun SnackbarHostState.showSonner(event: SonnerEvent): SnackbarResult {
         duration = event.duration,
         variant = event.variant
     ))
+    if (result == SnackbarResult.ActionPerformed) {
+        event.action?.execute?.invoke()
+    }
+    return result
 }
