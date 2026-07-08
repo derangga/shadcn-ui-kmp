@@ -25,6 +25,11 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -42,11 +47,17 @@ import com.komoui.themes.styles
  * A Jetpack Compose Drawer (Bottom Sheet) component for KomoUI.
  * Displays a modal bottom sheet with a title, description, and customizable footer.
  *
+ * Closing (whether via [onDismissRequest] or by setting [open] to false) plays the
+ * sheet's exit animation before the content is removed from composition.
+ *
  * @param onDismissRequest Callback invoked when the user tries to dismiss the drawer (e.g., by swiping down or tapping outside).
  * @param open Boolean state controlling the visibility of the drawer.
- * @param modifier The modifier to be applied to the drawer's content area.
  * @param title The composable content for the drawer's title.
  * @param description The composable content for the drawer's description.
+ * @param modifier The modifier to be applied to the drawer's content area.
+ * @param sheetState The [SheetState] controlling the bottom sheet.
+ * @param showCloseButton Whether to render an explicit close (X) button in the header.
+ * @param shouldDismissOnBackPress Whether a back press dismisses the drawer.
  * @param footer The composable content for the drawer's footer (e.g., action buttons).
  * @param content The main content of the drawer, placed between the description and the footer.
  */
@@ -55,18 +66,30 @@ import com.komoui.themes.styles
 fun Drawer(
     onDismissRequest: () -> Unit,
     open: Boolean,
-    modifier: Modifier = Modifier,
-    sheetState: SheetState = rememberModalBottomSheetState(),
     title: @Composable () -> Unit,
     description: @Composable () -> Unit,
-    content: @Composable ColumnScope.() -> Unit,
-    footer: (@Composable RowScope.() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    sheetState: SheetState = rememberModalBottomSheetState(),
     showCloseButton: Boolean = false,
-    shouldDismissOnBackPress: Boolean = true
+    shouldDismissOnBackPress: Boolean = true,
+    footer: (@Composable RowScope.() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
 ) {
     val styles = MaterialTheme.styles
 
-    if (open) {
+    // Keep the sheet composed until its hide animation finishes, so closing
+    // (programmatic or otherwise) plays the exit animation instead of vanishing.
+    var visible by remember { mutableStateOf(open) }
+    LaunchedEffect(open) {
+        if (open) {
+            visible = true
+        } else if (visible) {
+            sheetState.hide()
+            visible = false
+        }
+    }
+
+    if (visible) {
         ModalBottomSheet(
             onDismissRequest = onDismissRequest,
             sheetState = sheetState,
@@ -127,7 +150,6 @@ fun Drawer(
                     )
                 }
             },
-            modifier = Modifier,
             properties = ModalBottomSheetProperties(shouldDismissOnBackPress),
         ) {
             Column(
@@ -172,7 +194,7 @@ fun Drawer(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Close dialog",
+                                    contentDescription = "Close",
                                     tint = styles.mutedForeground
                                 )
                             }
