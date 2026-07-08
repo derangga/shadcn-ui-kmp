@@ -1,6 +1,6 @@
 package com.komoui.components
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,14 +14,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -154,41 +150,4 @@ fun TabsContent(
     ) {
         content()
     }
-}
-
-/**
- * Helper function to create animated color state
- */
-@Composable
-private fun animateColorAsState(
-    targetValue: Color,
-    animationSpec: androidx.compose.animation.core.AnimationSpec<Float> = tween(),
-    label: String = "ColorAnimation"
-): State<Color> {
-    val red by animateFloatAsState(
-        targetValue = targetValue.red,
-        animationSpec = animationSpec,
-        label = "${label}_red"
-    )
-    val green by animateFloatAsState(
-        targetValue = targetValue.green,
-        animationSpec = animationSpec,
-        label = "${label}_green"
-    )
-    val blue by animateFloatAsState(
-        targetValue = targetValue.blue,
-        animationSpec = animationSpec,
-        label = "${label}_blue"
-    )
-    val alpha by animateFloatAsState(
-        targetValue = targetValue.alpha,
-        animationSpec = animationSpec,
-        label = "${label}_alpha"
-    )
-
-    val colorState = remember(red, green, blue, alpha) {
-        derivedStateOf { Color(red, green, blue, alpha) }
-    }
-
-    return colorState
 }
