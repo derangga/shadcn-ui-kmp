@@ -332,8 +332,9 @@ fun PaginationScope.DefaultPagination() {
  * @param pageSize Rows per page.
  * @param initialSort Initial sort state.
  * @param onSortChange Observer callback fired when sort changes.
- * @param onSelectionChange Observer callback fired when selection changes. Items are compared
- *      by [rowKey] — two items with the same key are treated as the same row.
+ * @param onSelectionChange Observer callback fired when selection changes. Emits the set of
+ *      selected [rowKey] values, so selection survives item-instance refreshes and never
+ *      contains duplicates for the same row.
  * @param onRowClick Optional row click handler.
  * @param caption Optional caption text rendered below the table.
  * The footer below the table is laid out as two rows: a summary row showing "N of M
@@ -356,7 +357,7 @@ fun <T> DataTable(
     pageSize: Int = 10,
     initialSort: SortState = SortState(),
     onSortChange: ((SortState) -> Unit)? = null,
-    onSelectionChange: ((Set<T>) -> Unit)? = null,
+    onSelectionChange: ((Set<Any>) -> Unit)? = null,
     onRowClick: ((T) -> Unit)? = null,
     caption: String? = null,
     pagination: @Composable PaginationScope.() -> Unit = { DefaultPagination() }
@@ -369,13 +370,12 @@ fun <T> DataTable(
         onSortChange?.invoke(next)
     }
 
-    var selection by remember { mutableStateOf<Set<T>>(emptySet()) }
-    val updateSelection: (Set<T>) -> Unit = { next ->
-        selection = next
+    // Selection is stored by rowKey, not item instance, so it survives item refreshes
+    // and can never hold two entries for the same row.
+    var selectedKeySet by remember { mutableStateOf<Set<Any>>(emptySet()) }
+    val updateSelection: (Set<Any>) -> Unit = { next ->
+        selectedKeySet = next
         onSelectionChange?.invoke(next)
-    }
-    val selectedKeySet: Set<Any> = remember(selection) {
-        selection.mapTo(mutableSetOf(), rowKey)
     }
 
     val sorted = remember(items, sort, columns) {
@@ -433,11 +433,11 @@ fun <T> DataTable(
                             Checkbox(
                                 checked = allOnPageSelected,
                                 onCheckedChange = { checked ->
-                                    val next = selection.toMutableSet()
+                                    val next = selectedKeySet.toMutableSet()
                                     if (checked) {
-                                        next.addAll(pageItems)
+                                        next.addAll(pageKeys)
                                     } else {
-                                        next.removeAll { rowKey(it) in pageKeys }
+                                        next.removeAll(pageKeys)
                                     }
                                     updateSelection(next)
                                 }
@@ -500,11 +500,11 @@ fun <T> DataTable(
                                     Checkbox(
                                         checked = isSelected,
                                         onCheckedChange = { checked ->
-                                            val next = selection.toMutableSet()
+                                            val next = selectedKeySet.toMutableSet()
                                             if (checked) {
-                                                next.add(item)
+                                                next.add(key)
                                             } else {
-                                                next.removeAll { rowKey(it) == key }
+                                                next.remove(key)
                                             }
                                             updateSelection(next)
                                         }
@@ -538,7 +538,7 @@ fun <T> DataTable(
         ) {
             if (enableSelection) {
                 Text(
-                    text = "${selection.size} of ${sorted.size} row(s) selected.",
+                    text = "${selectedKeySet.size} of ${sorted.size} row(s) selected.",
                     color = styles.mutedForeground,
                     style = MaterialTheme.typography.bodySmall
                 )
