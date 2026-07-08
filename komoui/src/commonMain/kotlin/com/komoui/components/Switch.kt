@@ -78,13 +78,21 @@ fun Switch(
         modifier = modifier
             .size(width = switchWidth, height = switchHeight)
             .border(1.dp, borderColor.copy(alpha = if (enabled) 1f else disabledAlpha), CircleShape)
-            .toggleable(
-                value = checked,
-                onValueChange = onCheckedChange ?: { /* do nothing if null */ },
-                enabled = enabled,
-                role = Role.Switch,
-                interactionSource = interactionSource,
-                indication = null
+            // A null callback means the parent owns interaction (e.g. a clickable labeled row):
+            // drop our own click handling and toggleable semantics entirely.
+            .then(
+                if (onCheckedChange != null) {
+                    Modifier.toggleable(
+                        value = checked,
+                        onValueChange = onCheckedChange,
+                        enabled = enabled,
+                        role = Role.Switch,
+                        interactionSource = interactionSource,
+                        indication = null
+                    )
+                } else {
+                    Modifier
+                }
             )
             .drawBehind {
                 val trackCornerRadius = CornerRadius(switchHeight.toPx() / 2f)
