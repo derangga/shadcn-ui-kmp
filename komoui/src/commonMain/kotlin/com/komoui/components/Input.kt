@@ -27,6 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -57,6 +59,7 @@ enum class InputVariant {
  * @param isError Whether the input field is in an error state.
  * @param visualTransformation The visual transformation to be applied to the input field's text.
  * @param interactionSource The [MutableInteractionSource] that will be used to dispatch events when the input field is interacted with.
+ * @param focusRequester Optional [FocusRequester] attached to the text field so callers can focus it programmatically.
  * @param leadingIcon Optional composable to display at the start of the input field.
  * @param trailingIcon Optional composable to display at the end of the input field.
  * @param singleLine When true, this text field will not allow multiple lines of text.
@@ -79,6 +82,7 @@ fun Input(
     isError: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     interactionSource: MutableInteractionSource? = null,
+    focusRequester: FocusRequester? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     supportingText: @Composable (() -> Unit)? = null,
@@ -142,6 +146,7 @@ fun Input(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 44.dp)
+                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .then(borderStyle),
             enabled = enabled,
             readOnly = readOnly,

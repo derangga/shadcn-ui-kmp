@@ -3,6 +3,7 @@ package com.komoui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -148,7 +149,7 @@ fun <T> Select(
                 )
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Dropdown arrow",
+                    contentDescription = null,
                     tint = styles.mutedForeground,
                     modifier = Modifier
                         .size(20.dp)
@@ -165,8 +166,11 @@ fun <T> Select(
                 properties = PopupProperties(focusable = true), // Make popup focusable to handle outside clicks
                 onDismissRequest = { expanded = false }
             ) {
+                // Drive visibility from false -> true after composition so the enter transition plays.
+                val transitionState = remember { MutableTransitionState(false) }
+                transitionState.targetState = true
                 AnimatedVisibility(
-                    visible = true,
+                    visibleState = transitionState,
                     enter = fadeIn(animationSpec = tween(150)) + expandVertically(animationSpec = tween(150))
                 ) {
                     // Dropdown content container
