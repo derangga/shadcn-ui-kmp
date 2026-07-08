@@ -9,34 +9,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import com.komoui.themes.radius
 import com.komoui.themes.styles
-import kotlin.math.roundToInt
 
-/**
- * A Jetpack Compose Popover component for KomoUI.
- * Displays a floating panel of content (popover) when triggered.
- *
- * @param open Boolean state controlling the visibility of the popover.
- * @param onDismissRequest Callback invoked when the user tries to dismiss the popover (e.g., by tapping outside).
- * @param modifier The modifier to be applied to the popover's content container.
- * @param trigger The composable content that will act as the trigger for the popover.
- * @param content The composable content to display inside the popover.
- */
 @Composable
 fun Popover(
     open: Boolean,
@@ -47,32 +35,35 @@ fun Popover(
 ) {
     val styles = MaterialTheme.styles
     val radius = MaterialTheme.radius
-    var triggerWidthPx by remember { mutableIntStateOf(0) }
-    var triggerHeightPx by remember { mutableIntStateOf(0) }
-    var triggerXPositionPx by remember { mutableIntStateOf(0) }
-    var triggerYPositionPx by remember { mutableIntStateOf(0) }
+    val gapPx = with(LocalDensity.current) { 8.dp.roundToPx() }
 
-    Column {
-        Box(
-            modifier = Modifier.onGloballyPositioned { coordinates ->
-                triggerWidthPx = coordinates.size.width
-                triggerHeightPx = coordinates.size.height
-                val position = coordinates.parentLayoutCoordinates?.windowToLocal(coordinates.positionInWindow())
-                triggerXPositionPx = position?.x?.roundToInt() ?: 0
-                triggerYPositionPx = position?.y?.roundToInt() ?: 0
+    // Centers the popup horizontally under the anchor using the measured popup size,
+    // so true centering works regardless of density or popup width.
+    val positionProvider = remember(gapPx) {
+        object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset {
+                val x = anchorBounds.left + (anchorBounds.width - popupContentSize.width) / 2
+                val y = anchorBounds.bottom + gapPx
+                return IntOffset(x, y)
             }
-        ) {
-            trigger()
         }
+    }
+
+    Box {
+        trigger()
 
         if (open) {
             Popup(
-                onDismissRequest = onDismissRequest,
-                alignment = Alignment.TopStart,
-                offset = IntOffset((triggerXPositionPx - triggerWidthPx) / 2, triggerYPositionPx + triggerHeightPx + 12)
+                popupPositionProvider = positionProvider,
+                onDismissRequest = onDismissRequest
             ) {
                 Box(
-                    modifier = Modifier.shadow(1.dp, RoundedCornerShape(radius.md)) // shadow-md
+                    modifier = Modifier.shadow(4.dp, RoundedCornerShape(radius.md))
                 ) {
                     Column(
                         modifier = modifier
