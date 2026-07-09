@@ -223,14 +223,23 @@ private fun BoxScope.RailOverlay(side: SidebarSide) {
     val state = LocalSidebarState.current
     val styles = MaterialTheme.styles
 
+    // ponytail: 20.dp hit strip, not the full 48.dp — a 48-wide rail would overlap sidebar
+    // content along the whole edge. Widen further only if touch misses are reported.
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .width(4.dp)
+            .width(20.dp)
             .align(if (side == SidebarSide.Left) Alignment.CenterEnd else Alignment.CenterStart)
-            .background(styles.sidebarBorder)
             .clickable { state.toggleSidebar() },
-    )
+        contentAlignment = if (side == SidebarSide.Left) Alignment.CenterEnd else Alignment.CenterStart,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(4.dp)
+                .background(styles.sidebarBorder),
+        )
+    }
 }
 
 /**

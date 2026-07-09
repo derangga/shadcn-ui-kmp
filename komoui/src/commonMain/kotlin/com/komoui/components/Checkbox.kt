@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -88,10 +89,6 @@ fun Checkbox(
 
     Box(
         modifier = modifier
-            .size(24.dp)
-            .clip(RoundedCornerShape(radius.sm))
-            .background(backgroundColor)
-            .border(1.dp, currentBorderColor, RoundedCornerShape(radius.sm))
             .komoToggleable(
                 value = checked,
                 onValueChange = { newChecked -> onCheckedChange?.invoke(newChecked) },
@@ -99,7 +96,13 @@ fun Checkbox(
                 role = Role.Checkbox,
                 shape = RoundedCornerShape(radius.sm),
                 interactionSource = interactionSource,
-            ),
+            )
+            // Expands the touch target to 48.dp; the 24.dp visual stays (must follow min-size).
+            .minimumInteractiveComponentSize()
+            .size(24.dp)
+            .clip(RoundedCornerShape(radius.sm))
+            .background(backgroundColor)
+            .border(1.dp, currentBorderColor, RoundedCornerShape(radius.sm)),
         contentAlignment = Alignment.Center
     ) {
         if (checked) {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -106,6 +107,7 @@ fun <T> RadioGroupScope<T>.RadioButtonWithLabel(
                 enabled = enabled,
                 role = Role.RadioButton,
             )
+            .minimumInteractiveComponentSize()
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)

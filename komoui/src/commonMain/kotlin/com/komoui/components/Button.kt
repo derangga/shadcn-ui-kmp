@@ -22,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -238,10 +239,12 @@ fun Button(
 
     val isEnabled = enabled && !loading
 
+    // minimumInteractiveComponentSize reserves a 48.dp touch target (visual stays small);
+    // must precede the defaultMinSize size modifier. Covers the sub-48 sizes (Xs 32, IconSm 28).
     val baseModifier = if (fullWidth) {
-        modifier.then(minHeightModifier).fillMaxWidth()
+        modifier.minimumInteractiveComponentSize().then(minHeightModifier).fillMaxWidth()
     } else {
-        modifier.then(minHeightModifier)
+        modifier.minimumInteractiveComponentSize().then(minHeightModifier)
     }
 
     // Use TextButton for Ghost and Link variants to match behavior and remove default elevation

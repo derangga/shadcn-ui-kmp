@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -70,6 +71,7 @@ fun Sonner(
                                 role = Role.Button,
                                 shape = RoundedCornerShape(radius.sm),
                             )
+                            .minimumInteractiveComponentSize()
                     ) {
                         Text(actionLabel, color = styles.destructiveForeground)
                     }
@@ -95,6 +97,7 @@ fun Sonner(
                                 role = Role.Button,
                                 shape = RoundedCornerShape(radius.sm),
                             )
+                            .minimumInteractiveComponentSize()
                     ) {
                         Icon(
                             Icons.Default.Close,

@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -257,13 +258,14 @@ fun SidebarMenuAction(
     Box(
         modifier = modifier
             .padding(end = 4.dp)
-            .size(20.dp)
-            .clip(RoundedCornerShape(MaterialTheme.radius.sm))
             .komoClickable(
                 onClick = onClick,
                 role = Role.Button,
                 shape = RoundedCornerShape(MaterialTheme.radius.sm),
-            ),
+            )
+            .minimumInteractiveComponentSize()
+            .size(20.dp)
+            .clip(RoundedCornerShape(MaterialTheme.radius.sm)),
         contentAlignment = Alignment.Center,
         content = { content() },
     )
