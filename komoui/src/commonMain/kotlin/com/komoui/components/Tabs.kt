@@ -3,7 +3,6 @@ package com.komoui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +17,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoSelectable
 
 /**
  * @param selectedTabIndex The index of the currently selected tab.
@@ -122,7 +123,12 @@ fun TabsTrigger(
         modifier = modifier
             .clip(RoundedCornerShape(radius.sm))
             .background(backgroundColor)
-            .clickable { onClick() }
+            .komoSelectable(
+                selected = isSelected,
+                onClick = onClick,
+                role = Role.Tab,
+                shape = RoundedCornerShape(radius.sm),
+            )
             .padding(horizontal = 12.dp, vertical = 8.dp),
         contentAlignment = Alignment.Center
     ) {

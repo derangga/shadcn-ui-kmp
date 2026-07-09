@@ -8,7 +8,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -25,6 +24,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoToggleable
 
 /**
  * A Jetpack Compose Checkbox component for KomoUI.
@@ -92,13 +92,13 @@ fun Checkbox(
             .clip(RoundedCornerShape(radius.sm))
             .background(backgroundColor)
             .border(1.dp, currentBorderColor, RoundedCornerShape(radius.sm))
-            .toggleable(
+            .komoToggleable(
                 value = checked,
                 onValueChange = { newChecked -> onCheckedChange?.invoke(newChecked) },
                 enabled = enabled,
                 role = Role.Checkbox,
+                shape = RoundedCornerShape(radius.sm),
                 interactionSource = interactionSource,
-                indication = null
             ),
         contentAlignment = Alignment.Center
     ) {

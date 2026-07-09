@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -31,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +38,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 import kotlinx.datetime.LocalDate
 import kotlin.math.roundToInt
 
@@ -156,12 +157,13 @@ fun DatePicker(
                 }
                 .clip(RoundedCornerShape(radius.md))
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
-                .clickable(
+                .komoClickable(
+                    onClick = { showCalendarPopup = !showCalendarPopup },
+                    role = Role.DropdownList,
+                    shape = RoundedCornerShape(radius.md),
+                    stateDescription = if (showCalendarPopup) "Expanded" else "Collapsed",
                     interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    showCalendarPopup = !showCalendarPopup
-                }
+                )
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -278,12 +280,13 @@ fun DateRangePicker(
                 }
                 .clip(RoundedCornerShape(radius.md))
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
-                .clickable(
+                .komoClickable(
+                    onClick = { showCalendarPopup = !showCalendarPopup },
+                    role = Role.DropdownList,
+                    shape = RoundedCornerShape(radius.md),
+                    stateDescription = if (showCalendarPopup) "Expanded" else "Collapsed",
                     interactionSource = interactionSource,
-                    indication = null
-                ) {
-                    showCalendarPopup = !showCalendarPopup
-                }
+                )
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {

@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.komoui.themes.styles
+import com.komoui.utils.komoToggleable
 
 /**
  * A Jetpack Compose Switch component for KomoUI.
@@ -82,13 +82,13 @@ fun Switch(
             // drop our own click handling and toggleable semantics entirely.
             .then(
                 if (onCheckedChange != null) {
-                    Modifier.toggleable(
+                    Modifier.komoToggleable(
                         value = checked,
                         onValueChange = onCheckedChange,
                         enabled = enabled,
                         role = Role.Switch,
+                        shape = CircleShape,
                         interactionSource = interactionSource,
-                        indication = null
                     )
                 } else {
                     Modifier

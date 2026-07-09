@@ -40,6 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +52,7 @@ import androidx.compose.ui.window.Dialog
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoSelectable
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -599,11 +603,13 @@ fun Calendar(
                                     .aspectRatio(1f)
                                     .clip(shape)
                                     .background(backgroundColor)
-                                    .clickable(
+                                    .komoSelectable(
+                                        selected = isSelected,
                                         enabled = isClickable,
+                                        role = Role.Button,
+                                        shape = shape,
                                         interactionSource = interactionSource,
-                                        indication = null
-                                    ) {
+                                        onClick = {
                                         when (selectionMode) {
                                             is CalendarSelectionMode.Single -> {
                                                 selectionMode.onDateSelected(date)
@@ -635,7 +641,9 @@ fun Calendar(
                                         if (!isCurrentMonth) {
                                             currentMonth = YearMonth.from(date)
                                         }
-                                    },
+                                        },
+                                    )
+                                    .semantics { contentDescription = date.toString() },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(

@@ -1,7 +1,6 @@
 package com.komoui.components.sonner
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +26,7 @@ import com.komoui.themes.radius
 import androidx.compose.ui.graphics.Color
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 
 /**
  * A styled snackbar component inspired by the Sonner toast library.
@@ -64,7 +65,11 @@ fun Sonner(
                     Box(
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .clickable(onClick = onActionClick)
+                            .komoClickable(
+                                onClick = onActionClick,
+                                role = Role.Button,
+                                shape = RoundedCornerShape(radius.sm),
+                            )
                     ) {
                         Text(actionLabel, color = styles.destructiveForeground)
                     }
@@ -85,7 +90,11 @@ fun Sonner(
                     Box(
                         modifier = Modifier
                             .padding(end = 16.dp)
-                            .clickable(onClick = onDismiss)
+                            .komoClickable(
+                                onClick = onDismiss,
+                                role = Role.Button,
+                                shape = RoundedCornerShape(radius.sm),
+                            )
                     ) {
                         Icon(
                             Icons.Default.Close,

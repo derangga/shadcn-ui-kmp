@@ -3,9 +3,7 @@ package com.komoui.components
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,8 +40,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 
 /**
  * Root Table primitive. Wraps content in a horizontally scrollable container with a rounded
@@ -139,10 +139,10 @@ fun TableRow(
     val styles = MaterialTheme.styles
     val background = if (selected) styles.muted else styles.card
     val clickModifier = if (onClick != null) {
-        Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick
+        Modifier.komoClickable(
+            onClick = onClick,
+            role = Role.Button,
+            stateDescription = if (selected) "Selected" else null,
         )
     } else Modifier
     Row(
@@ -564,10 +564,15 @@ private fun SortableHeader(
     val clickable = column.sortable && column.comparator != null
 
     val rowModifier = if (clickable) {
-        Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick
+        Modifier.komoClickable(
+            onClick = onClick,
+            role = Role.Button,
+            stateDescription = when {
+                !isActive -> "Not sorted"
+                sort.direction == SortDirection.ASC -> "Sorted ascending"
+                sort.direction == SortDirection.DESC -> "Sorted descending"
+                else -> "Not sorted"
+            },
         )
     } else Modifier
 
