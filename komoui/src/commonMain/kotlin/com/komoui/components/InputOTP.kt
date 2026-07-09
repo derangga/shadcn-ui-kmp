@@ -29,6 +29,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -93,6 +95,8 @@ object InputOTPDefaults {
  * @param modifier The modifier applied to the root row.
  * @param length Total number of slots.
  * @param enabled Whether input is enabled.
+ * @param readOnly Whether the field displays its value but rejects edits.
+ * @param focusRequester Optional [FocusRequester] so callers can focus the field programmatically.
  * @param isError Whether the component is in an error state.
  * @param keyboardType Soft-keyboard type. Defaults to [KeyboardType.NumberPassword].
  * @param keyboardActions Keyboard action callbacks (e.g. onDone).
@@ -108,6 +112,8 @@ fun InputOTP(
     modifier: Modifier = Modifier,
     length: Int = 6,
     enabled: Boolean = true,
+    readOnly: Boolean = false,
+    focusRequester: FocusRequester? = null,
     isError: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.NumberPassword,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -118,21 +124,27 @@ fun InputOTP(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val sanitized = value.take(length)
+    // Numeric keyboard types only ever hold digits, applied to both display and input so an
+    // external value with non-digits (or pasted whitespace/emoji) is filtered, not just truncated.
+    val filterForKeyboard: (String) -> String = { raw ->
+        when (keyboardType) {
+            KeyboardType.Number, KeyboardType.NumberPassword, KeyboardType.Decimal ->
+                raw.filter { it.isDigit() }
+            else -> raw
+        }
+    }
+    val sanitized = filterForKeyboard(value).take(length)
 
     BasicTextField(
         value = sanitized,
         onValueChange = { new ->
-            val filtered = when (keyboardType) {
-                KeyboardType.Number, KeyboardType.NumberPassword, KeyboardType.Decimal ->
-                    new.filter { it.isDigit() }
-                else -> new
-            }.take(length)
+            val filtered = filterForKeyboard(new).take(length)
             if (filtered != sanitized) onValueChange(filtered)
         },
-        modifier = modifier,
+        modifier = modifier
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
         enabled = enabled,
-        readOnly = false,
+        readOnly = readOnly,
         textStyle = LocalTextStyle.current.copy(color = Color.Transparent),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         keyboardActions = keyboardActions,

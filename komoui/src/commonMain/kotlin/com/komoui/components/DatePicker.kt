@@ -42,23 +42,55 @@ import kotlinx.datetime.LocalDate
 import kotlin.math.roundToInt
 
 class DateFormatter(private val pattern: String) {
+    /**
+     * Formats [date] according to [pattern]. Supported tokens:
+     * `yyyy`/`yy` (year), `MMMM`/`MMM`/`MM`/`M` (month), `dd`/`d` (day of month).
+     * Any other character is emitted verbatim.
+     */
     fun format(date: LocalDate): String {
-        return when (pattern) {
-            "MMM dd, yyyy" -> formatDefault(date)
-            else -> formatDefault(date)
+        val sb = StringBuilder()
+        var i = 0
+        while (i < pattern.length) {
+            val c = pattern[i]
+            if (c == 'y' || c == 'M' || c == 'd') {
+                var j = i
+                while (j < pattern.length && pattern[j] == c) j++
+                sb.append(formatToken(c, j - i, date))
+                i = j
+            } else {
+                sb.append(c)
+                i++
+            }
+        }
+        return sb.toString()
+    }
+
+    private fun formatToken(token: Char, count: Int, date: LocalDate): String {
+        // Month.ordinal is 0-based (JANUARY == 0).
+        val monthIndex = date.month.ordinal
+        return when (token) {
+            'y' -> if (count <= 2) (date.year % 100).toString().padStart(2, '0') else date.year.toString()
+            'M' -> when {
+                count >= 4 -> fullMonths[monthIndex]
+                count == 3 -> shortMonths[monthIndex]
+                count == 2 -> (monthIndex + 1).toString().padStart(2, '0')
+                else -> (monthIndex + 1).toString()
+            }
+            'd' -> if (count >= 2) date.day.toString().padStart(2, '0') else date.day.toString()
+            else -> ""
         }
     }
 
-    private fun formatDefault(date: LocalDate): String {
-        val monthNames = listOf(
+    companion object {
+        private val shortMonths = listOf(
             "Jan", "Feb", "Mar", "Apr", "May", "Jun",
             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
         )
-        val monthName = monthNames[date.month.ordinal - 1]
-        return "$monthName ${date.day.toString().padStart(2, '0')}, ${date.year}"
-    }
+        private val fullMonths = listOf(
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        )
 
-    companion object {
         fun ofPattern(pattern: String): DateFormatter {
             return DateFormatter(pattern)
         }

@@ -1,7 +1,7 @@
 package com.komoui.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -12,7 +12,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -52,38 +51,53 @@ data class AccordionItemData(
 )
 
 /**
- * It allows displaying a list of collapsible items with two expansion modes.
+ * Displays a list of collapsible items with two expansion modes.
+ *
+ * Works uncontrolled by default (seeded from [defaultOpenItemId]); pass [openItems]
+ * together with [onOpenChange] to drive open state from the caller.
  *
  * @param items A list of [AccordionItemData] representing the accordion sections.
  * @param modifier The modifier to be applied to the accordion container.
- * @param defaultOpenItemId The ID of the item that should be open by default. Null if none.
- * @param singleItemExpand When true, only one item can be expanded at a time. When false, multiple items can be expanded.
+ * @param defaultOpenItemId The ID of the item open by default (uncontrolled mode). Null if none.
+ * @param singleItemExpand When true, only one item can be expanded at a time.
+ * @param openItems Controlled set of open item IDs. When non-null the caller owns open state.
+ * @param onOpenChange Invoked with the next set of open item IDs when the user toggles an item.
  */
 @Composable
 fun Accordion(
     items: List<AccordionItemData>,
     modifier: Modifier = Modifier,
     defaultOpenItemId: String? = null,
-    singleItemExpand: Boolean = false
+    singleItemExpand: Boolean = false,
+    openItems: Set<String>? = null,
+    onOpenChange: ((Set<String>) -> Unit)? = null
 ) {
     val styles = MaterialTheme.styles
-    // Use a Set to track multiple expanded items when singleItemExpand is false
-    var expandedItems by remember {
-        mutableStateOf(
-            if (singleItemExpand && defaultOpenItemId != null) setOf(defaultOpenItemId)
-            else if (!singleItemExpand && defaultOpenItemId != null) setOf(defaultOpenItemId)
-            else emptySet()
-        )
+    val chevron = remember(styles.foreground) { chevronDown(styles.foreground) }
+
+    // Uncontrolled state; re-seeded when defaultOpenItemId or singleItemExpand change.
+    var internalOpen by remember(defaultOpenItemId, singleItemExpand) {
+        mutableStateOf(defaultOpenItemId?.let(::setOf) ?: emptySet())
+    }
+    val expandedItems = openItems ?: internalOpen
+
+    fun setOpen(next: Set<String>) {
+        val coerced = if (singleItemExpand) next.take(1).toSet() else next
+        if (openItems == null) internalOpen = coerced
+        onOpenChange?.invoke(coerced)
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        items.forEachIndexed { index, item ->
+        items.forEach { item ->
             val isExpanded = expandedItems.contains(item.id)
+            val rotation by animateFloatAsState(
+                targetValue = if (isExpanded) 180f else 0f,
+                animationSpec = tween(300), label = "chevronRotation"
+            )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .animateContentSize(animationSpec = tween(durationMillis = 300))
                     .drawBehind {
                         val strokeWidth = 1.dp.toPx()
                         drawLine(
@@ -102,17 +116,12 @@ fun Accordion(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
                         ) {
-                            if (singleItemExpand) {
-                                // Single item expansion mode
-                                expandedItems = if (isExpanded) emptySet() else setOf(item.id)
+                            val next = if (singleItemExpand) {
+                                if (isExpanded) emptySet() else setOf(item.id)
                             } else {
-                                // Multiple items expansion mode
-                                expandedItems = if (isExpanded) {
-                                    expandedItems - item.id
-                                } else {
-                                    expandedItems + item.id
-                                }
+                                if (isExpanded) expandedItems - item.id else expandedItems + item.id
                             }
+                            setOpen(next)
                         }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -130,29 +139,11 @@ fun Accordion(
                     }
 
                     Icon(
-                        imageVector = ImageVector.Builder(
-                            name = "ChevronDown",
-                            defaultWidth = 24.dp,
-                            defaultHeight = 24.dp,
-                            viewportWidth = 24f,
-                            viewportHeight = 24f
-                        ).apply {
-                            path(
-                                fill = null,
-                                stroke = SolidColor(styles.foreground),
-                                strokeLineWidth = 2f,
-                                strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
-                                strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round
-                            ) {
-                                moveTo(6f, 9f)
-                                lineTo(12f, 15f)
-                                lineTo(18f, 9f)
-                            }
-                        }.build(),
+                        imageVector = chevron,
                         contentDescription = if (isExpanded) "Collapse" else "Expand",
                         tint = styles.foreground,
                         modifier = Modifier
-                            .rotate(if (isExpanded) 180f else 0f)
+                            .rotate(rotation)
                             .width(24.dp)
                             .height(24.dp)
                     )
@@ -161,16 +152,8 @@ fun Accordion(
                 // Accordion Content
                 AnimatedVisibility(
                     visible = isExpanded,
-                    enter = fadeIn(animationSpec = tween(300)) + expandVertically(
-                        animationSpec = tween(
-                            300
-                        )
-                    ),
-                    exit = fadeOut(animationSpec = tween(300)) + shrinkVertically(
-                        animationSpec = tween(
-                            300
-                        )
-                    )
+                    enter = fadeIn(animationSpec = tween(300)) + expandVertically(animationSpec = tween(300)),
+                    exit = fadeOut(animationSpec = tween(300)) + shrinkVertically(animationSpec = tween(300))
                 ) {
                     Column(
                         modifier = Modifier
@@ -188,10 +171,27 @@ fun Accordion(
                     }
                 }
             }
-            // Add a horizontal line separator between items, except for the last one
-            if (index < items.size - 1) {
-                Spacer(modifier = Modifier.height(0.dp))
-            }
         }
     }
 }
+
+private fun chevronDown(color: androidx.compose.ui.graphics.Color): ImageVector =
+    ImageVector.Builder(
+        name = "ChevronDown",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f
+    ).apply {
+        path(
+            fill = null,
+            stroke = SolidColor(color),
+            strokeLineWidth = 2f,
+            strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+            strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round
+        ) {
+            moveTo(6f, 9f)
+            lineTo(12f, 15f)
+            lineTo(18f, 9f)
+        }
+    }.build()

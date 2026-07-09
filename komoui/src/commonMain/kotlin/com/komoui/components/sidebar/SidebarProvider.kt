@@ -19,6 +19,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -93,11 +94,14 @@ fun SidebarProvider(
         if (!isMobile) openMobile = false
     }
 
+    // Kept out of the remember keys so an inline (non-remembered) callback doesn't rebuild
+    // SidebarState on every recomposition; the state's captured lambda reads the latest.
+    val onOpenChangeState = rememberUpdatedState(onOpenChange)
     val state = remember(
         isMobile, side, variant, collapsible,
         effectiveOpen, openMobile,
         width, widthMobile, widthIcon, animationSpec,
-        controlled, onOpenChange,
+        controlled,
     ) {
         SidebarState(
             isMobile = isMobile,
@@ -111,7 +115,7 @@ fun SidebarProvider(
             widthIcon = widthIcon,
             animationSpec = animationSpec,
             onOpenChange = { next ->
-                if (controlled) onOpenChange?.invoke(next) else internalOpen = next
+                if (controlled) onOpenChangeState.value?.invoke(next) else internalOpen = next
             },
             onOpenMobileChange = { next -> openMobile = next },
         )
@@ -134,8 +138,12 @@ fun SidebarProvider(
             LocalSidebarState provides state,
             LocalSidebarSlots provides slots,
         ) {
-            slots.sidebar = null
-            slots.inset = null
+            // intentionally NOT reset to null here. Nulling every recomposition
+            // blanks the layout when a child (Sidebar/SidebarInset) skips re-registration —
+            // the snapshot-backed slot invalidates the reader, which then renders null.
+            // A skipping child means its content is unchanged, so its last lambda is still
+            // valid. Add DisposableEffect-based clearing only if a conditionally-mounted
+            // Sidebar/SidebarInset use case appears.
             // Children (Sidebar, SidebarInset) register their content into `slots` and emit nothing.
             content()
             // Render the captured slots in the layout appropriate for the viewport.

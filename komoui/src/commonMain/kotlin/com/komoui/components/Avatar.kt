@@ -13,11 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.styles
@@ -113,11 +113,14 @@ fun Avatar(
 
 @Composable
 private fun AvatarFallbackText(fallbackText: String, size: Dp, styles: KomoStyles) {
+    // Size the initials to the (fixed-dp) avatar via density, not font scale, so they don't
+    // grow past the container and clip when the user enables large system fonts.
+    val fontSize = with(LocalDensity.current) { (size * 0.4f).toSp() }
     Text(
         text = fallbackText,
         style = TextStyle(
             color = styles.mutedForeground,
-            fontSize = (size.value * 0.4).sp,
+            fontSize = fontSize,
             fontWeight = FontWeight.Medium
         )
     )

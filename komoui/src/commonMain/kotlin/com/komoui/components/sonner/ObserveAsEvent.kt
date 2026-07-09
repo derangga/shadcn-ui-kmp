@@ -1,4 +1,4 @@
-package com.komoui.components.sooner
+package com.komoui.components.sonner
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

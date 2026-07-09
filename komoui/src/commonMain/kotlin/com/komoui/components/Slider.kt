@@ -20,18 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
-/**
- * A Jetpack Compose Slider component for KomoUI.
- * Allows users to select a value from a continuous range.
- *
- * @param value The current value of the slider.
- * @param onValueChange Callback invoked when the slider's value changes.
- * @param modifier The modifier to be applied to the slider.
- * @param valueRange The range of values the slider can take.
- * @param steps The number of discrete steps the slider can take.
- * @param enabled Controls the enabled state of the slider.
- * @param colors Optional custom colors for the slider.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Slider(
@@ -48,9 +36,11 @@ fun Slider(
     ComposeSlider(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier
+        // Defaults before the caller modifier so a caller can size the slider (narrower/taller).
+        modifier = Modifier
             .fillMaxWidth()
-            .height(20.dp),
+            .height(20.dp)
+            .then(modifier),
         valueRange = valueRange,
         steps = steps,
         enabled = enabled,
@@ -58,28 +48,28 @@ fun Slider(
             thumbColor = themeColors.background,
             activeTrackColor = themeColors.primary,
             inactiveTrackColor = themeColors.secondary,
-            activeTickColor = themeColors.primaryForeground.copy(alpha = 0.5f),
-            inactiveTickColor = themeColors.secondaryForeground.copy(alpha = 0.5f),
             disabledThumbColor = themeColors.mutedForeground.copy(alpha = 0.5f),
             disabledActiveTrackColor = themeColors.primary.copy(alpha = 0.5f),
-            disabledInactiveTrackColor = themeColors.secondary.copy(alpha = 0.5f),
-            disabledActiveTickColor = themeColors.primaryForeground.copy(alpha = 0.2f),
-            disabledInactiveTickColor = themeColors.secondaryForeground.copy(alpha = 0.2f)
+            disabledInactiveTrackColor = themeColors.secondary.copy(alpha = 0.5f)
         ),
         thumb = {
+            val borderColor = if (enabled) themeColors.primary else themeColors.primary.copy(alpha = 0.5f)
             Box(
                 modifier = Modifier
                     .size(20.dp)
                     .clip(CircleShape)
                     .background(themeColors.background)
-                    .border(2.dp, themeColors.primary, CircleShape)
+                    .border(2.dp, borderColor, CircleShape)
             )
         },
-        track = { sliderPositions ->
+        track = {
             val trackColor = if (enabled) themeColors.secondary else themeColors.secondary.copy(alpha = 0.5f)
             val activeTrackColor = if (enabled) themeColors.primary else themeColors.primary.copy(alpha = 0.5f)
-            // Calculate the fraction of the active track based on value and valueRange
-            val activeTrackWidthFraction = (value - valueRange.start) / (valueRange.endInclusive - valueRange.start)
+            // Fraction of the active track; guard the empty range and clamp out-of-range values,
+            // since fillMaxWidth() requires a 0..1 fraction.
+            val span = valueRange.endInclusive - valueRange.start
+            val activeTrackWidthFraction =
+                if (span == 0f) 0f else ((value - valueRange.start) / span).coerceIn(0f, 1f)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

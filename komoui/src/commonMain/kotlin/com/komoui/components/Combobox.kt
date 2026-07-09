@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -204,6 +205,8 @@ fun ComboBox(
                             .border(1.dp, styles.border, RoundedCornerShape(radius.lg))
                             .padding(8.dp)
                     ) {
+                        val searchFocusRequester = remember { FocusRequester() }
+                        LaunchedEffect(Unit) { searchFocusRequester.requestFocus() }
                         Input(
                             value = searchText,
                             onValueChange = { searchText = it },
@@ -211,6 +214,7 @@ fun ComboBox(
                             placeholder = "Search options...",
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "search") },
                             singleLine = true,
+                            focusRequester = searchFocusRequester,
                         )
 
                         if (filteredOptions.isEmpty()) {
@@ -251,6 +255,7 @@ fun ComboBox(
                                     ) {
                                         Text(
                                             text = option,
+                                            color = if (isSelected) styles.accentForeground else styles.popoverForeground,
                                             fontSize = 14.sp,
                                             modifier = Modifier.weight(1f)
                                         )

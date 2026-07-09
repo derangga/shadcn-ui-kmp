@@ -22,7 +22,7 @@ iosApp/                 # iOS app wrapper (Xcode project)
 
 - `components/` — One file per component (Button.kt, Card.kt, etc.)
 - `components/sidebar/` — Sidebar component (multi-file)
-- `components/sooner/` — Sonner toast system (multi-file)
+- `components/sonner/` — Sonner toast system (multi-file)
 - `components/charts/` — Chart components (Bar/Line/Area)
 - `themes/` — KomoTheme, KomoStyles, light/dark colors, radius, typography
 - `utils/` — Shared utilities

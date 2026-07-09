@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.animateDpAsState
 import com.komoui.themes.styles
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Orientation for the Carousel component.
@@ -79,23 +77,26 @@ fun Carousel(
     onItemChanged: ((Int) -> Unit)? = null,
     content: @Composable PagerScope.(position: Int) -> Unit
 ) {
-    val pagerState = state ?: rememberPagerState { itemCount }
+    // rememberPagerState must be called unconditionally (never inside `?:`),
+    // otherwise toggling state null/non-null hits conditional-remember behavior.
+    val internalState = rememberPagerState { itemCount }
+    val pagerState = state ?: internalState
 
     // Invoke onItemChanged callback when the current page changes
     LaunchedEffect(pagerState.currentPage) {
         onItemChanged?.invoke(pagerState.currentPage)
     }
 
-    if (autoScroll && itemCount > 1) {
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.isScrollInProgress }.collectLatest { scrolling ->
-                if (!scrolling) {
-                    while (true) {
-                        delay(autoScrollDelayMillis)
-                        val nextPage = (pagerState.currentPage + 1) % itemCount
-                        pagerState.animateScrollToPage(nextPage)
-                    }
-                }
+    // Auto-scroll: delay, then advance only if not actively being dragged. Because
+    // animateScrollToPage suspends until it settles, the loop never observes (and so
+    // never cancels) its own in-flight animation. Keyed on all inputs so changes take effect.
+    LaunchedEffect(pagerState, autoScroll, autoScrollDelayMillis, itemCount) {
+        if (!autoScroll || itemCount <= 1) return@LaunchedEffect
+        while (true) {
+            delay(autoScrollDelayMillis)
+            if (!pagerState.isScrollInProgress) {
+                val nextPage = (pagerState.currentPage + 1) % itemCount
+                pagerState.animateScrollToPage(nextPage)
             }
         }
     }
@@ -128,7 +129,8 @@ fun Carousel(
         }
 
         if (showIndicator) {
-            CarouselIndicator(pagerState, itemCount, indicatorStyle)
+            // Use the pager's own page count so an external state and the indicator agree.
+            CarouselIndicator(pagerState, pagerState.pageCount, indicatorStyle)
         }
     }
 }

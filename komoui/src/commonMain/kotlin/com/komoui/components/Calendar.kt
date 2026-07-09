@@ -284,7 +284,8 @@ fun Calendar(
 ) {
     val themeColors = MaterialTheme.styles
     val radius = MaterialTheme.radius
-    var currentMonth by remember { mutableStateOf(initialMonth) }
+    // Keyed on initialMonth so the view navigates when the caller changes it after first composition.
+    var currentMonth by remember(initialMonth) { mutableStateOf(initialMonth) }
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     }
@@ -538,23 +539,28 @@ fun Calendar(
                                 else -> RoundedCornerShape(radius.sm)
                             }
 
-                            // Only animate for press state; use direct values for other states
-                            val backgroundColor = if (isPressed && isClickable) {
-                                animateColorAsState(
-                                    targetValue = cellBgStyle.onPressed,
-                                    animationSpec = tween(durationMillis = 100),
-                                    label = "dayPressBackground"
-                                ).value
-                            } else {
-                                when {
-                                    isSelected -> cellBgStyle.selectedDate
-                                    isSingleDayRange -> cellBgStyle.rangeEndpointBg
-                                    isRangeStart || isRangeEnd -> cellBgStyle.rangeEndpointBg
-                                    isInRange -> cellBgStyle.inRangeBg
-                                    isToday && isCurrentMonth -> cellBgStyle.todayUnselectedBg
-                                    else -> cellBgStyle.defaultDateCell
-                                }
+                            // Hoisted out of the isPressed branch so the animation persists across
+                            // press/release and actually animates (instead of snapping and disposing).
+                            val targetBackground = when {
+                                isPressed && isClickable -> cellBgStyle.onPressed
+                                isSelected -> cellBgStyle.selectedDate
+                                isSingleDayRange -> cellBgStyle.rangeEndpointBg
+                                isRangeStart || isRangeEnd -> cellBgStyle.rangeEndpointBg
+                                isInRange -> cellBgStyle.inRangeBg
+                                isToday && isCurrentMonth -> cellBgStyle.todayUnselectedBg
+                                else -> cellBgStyle.defaultDateCell
                             }
+                            // Avoid animateColorAsState fading through black: Color.Transparent is
+                            // (0,0,0, alpha 0), so tweening a transparent cell to a light fill (in-range
+                            // accent) passes through muddy grey. Swap a transparent target for a same-hue
+                            // zero-alpha color so transparent<->fill transitions animate alpha only.
+                            val animTarget = if (targetBackground.alpha == 0f)
+                                themeColors.accent.copy(alpha = 0f) else targetBackground
+                            val backgroundColor = animateColorAsState(
+                                targetValue = animTarget,
+                                animationSpec = tween(durationMillis = 100),
+                                label = "dayBackground"
+                            ).value
 
                             val textColor = when {
                                 isSelected -> cellTextStyle.selectedDate

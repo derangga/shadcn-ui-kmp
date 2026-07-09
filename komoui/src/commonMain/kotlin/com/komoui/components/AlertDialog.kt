@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -32,6 +33,8 @@ import com.komoui.themes.styles
  * @param title The composable content for the alert dialog's title.
  * @param description The composable content for the alert dialog's description.
  * @param actions The composable content for the alert dialog's action buttons (e.g., AlertDialogAction, AlertDialogCancel).
+ * @param properties Dialog behavior. Defaults to non-dismissable (no outside-tap / back-press dismiss),
+ * matching shadcn's AlertDialog which can only be dismissed via an explicit action.
  */
 @Composable
 fun AlertDialog(
@@ -40,13 +43,17 @@ fun AlertDialog(
     modifier: Modifier = Modifier,
     title: @Composable () -> Unit,
     description: @Composable () -> Unit,
-    actions: @Composable () -> Unit
+    actions: @Composable () -> Unit,
+    properties: DialogProperties = DialogProperties(
+        dismissOnBackPress = false,
+        dismissOnClickOutside = false
+    )
 ) {
     val styles = MaterialTheme.styles
     val radius = MaterialTheme.radius
 
     if (open) {
-        Dialog(onDismissRequest = onDismissRequest) {
+        Dialog(onDismissRequest = onDismissRequest, properties = properties) {
             Column(
                 modifier = modifier
                     .fillMaxWidth()

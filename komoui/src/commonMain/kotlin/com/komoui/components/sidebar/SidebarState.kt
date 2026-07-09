@@ -5,7 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -108,8 +110,13 @@ class SidebarState internal constructor(
     internal fun setOpenMobile(open: Boolean) = onOpenMobileChange(open)
 }
 
-/** Provides the active [SidebarState]. Throws when used outside a [SidebarProvider]. */
-val LocalSidebarState = staticCompositionLocalOf<SidebarState> {
+/**
+ * Provides the active [SidebarState]. Throws when used outside a [SidebarProvider].
+ *
+ * Read-tracking (`compositionLocalOf`, not `staticCompositionLocalOf`): a new state on
+ * toggle recomposes only the composables that actually read it, not the whole subtree.
+ */
+val LocalSidebarState = compositionLocalOf<SidebarState> {
     error("SidebarState not provided. Wrap your content in SidebarProvider.")
 }
 
@@ -119,10 +126,13 @@ val LocalSidebarState = staticCompositionLocalOf<SidebarState> {
  * layout position (Row on desktop, ModalNavigationDrawer on mobile).
  */
 internal class SidebarSlots {
-    var sidebar: (@Composable () -> Unit)? = null
-    var inset: (@Composable () -> Unit)? = null
+    // Snapshot-backed so that when a slot is (re)registered in one recompose scope, the
+    // reader scope (SidebarLayoutImpl / SidebarShell) is invalidated instead of rendering
+    // a stale captured lambda.
+    var sidebar: (@Composable () -> Unit)? by mutableStateOf(null)
+    var inset: (@Composable () -> Unit)? by mutableStateOf(null)
     /** Set by [SidebarRail] to opt the sidebar shell into rendering an outer-edge rail. */
-    var railEnabled: Boolean = false
+    var railEnabled: Boolean by mutableStateOf(false)
 }
 
 internal val LocalSidebarSlots = compositionLocalOf<SidebarSlots?> { null }

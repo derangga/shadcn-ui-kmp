@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem as ComposeDropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -100,7 +101,9 @@ fun DropdownMenuItem(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val containerColor = animateColorAsState(
-        targetValue = if (isPressed) styles.accent else styles.background,
+        // Transparent (not styles.background) so items match the popover container
+        // on themes where popover != background.
+        targetValue = if (isPressed) styles.accent else Color.Transparent,
         animationSpec = tween(durationMillis = 100), label = "menuItemContainerColor"
     ).value
 
@@ -155,8 +158,8 @@ fun DropdownMenuSeparator(modifier: Modifier = Modifier) {
     Spacer(
         modifier = modifier
             .fillMaxWidth()
+            .padding(vertical = 4.dp)
             .height(1.dp)
             .background(styles.muted)
-            .padding(vertical = 4.dp)
     )
 }

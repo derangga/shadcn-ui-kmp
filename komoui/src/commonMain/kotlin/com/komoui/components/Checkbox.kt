@@ -105,7 +105,8 @@ fun Checkbox(
         if (checked) {
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = "Checked",
+                // Null: the toggleable(role = Role.Checkbox) box already announces checked state.
+                contentDescription = null,
                 tint = checkmarkColor,
                 modifier = Modifier.size(16.dp)
             )

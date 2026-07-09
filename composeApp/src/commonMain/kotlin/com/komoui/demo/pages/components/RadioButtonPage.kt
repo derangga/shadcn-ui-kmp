@@ -57,24 +57,16 @@ fun RadioButtonPage() {
                 ) {
                     RadioButtonWithLabel(
                         value = "option-a",
-                        label = "Option A",
-                        selectedValue = selectedOption1,
-                        onValueChange = { selectedOption1 = it })
+                        label = "Option A")
                     RadioButtonWithLabel(
                         value = "option-b",
-                        label = "Option B",
-                        selectedValue = selectedOption1,
-                        onValueChange = { selectedOption1 = it })
+                        label = "Option B")
                     RadioButtonWithLabel(
                         value = "option-c",
-                        label = "Option C",
-                        selectedValue = selectedOption1,
-                        onValueChange = { selectedOption1 = it })
+                        label = "Option C")
                     RadioButtonWithLabel(
                         value = "option-d",
                         label = "Option D (disabled)",
-                        selectedValue = selectedOption1,
-                        onValueChange = { selectedOption1 = it },
                         enabled = false
                     ) // Disabled option
                 }
@@ -106,19 +98,13 @@ fun RadioButtonPage() {
                 ) {
                     RadioButtonWithLabel(
                         value = "radio-1",
-                        label = "Category 1",
-                        selectedValue = selectedOption2,
-                        onValueChange = { selectedOption2 = it })
+                        label = "Category 1")
                     RadioButtonWithLabel(
                         value = "radio-2",
-                        label = "Category 2",
-                        selectedValue = selectedOption2,
-                        onValueChange = { selectedOption2 = it })
+                        label = "Category 2")
                     RadioButtonWithLabel(
                         value = "radio-3",
-                        label = "Category 3",
-                        selectedValue = selectedOption2,
-                        onValueChange = { selectedOption2 = it })
+                        label = "Category 3")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import androidx.compose.ui.window.Dialog as ComposeDialog
+import androidx.compose.ui.window.DialogProperties
 
 /**
  * A Jetpack Compose Dialog component for KomoUI.
@@ -40,6 +41,7 @@ import androidx.compose.ui.window.Dialog as ComposeDialog
  *  typically containing the title (e.g., using [DialogTitle] and [DialogDescription]).
  * @param body The composable content for the dialog's main body (e.g., input fields, lists, etc.).
  * @param footer The composable content for the dialog's footer (e.g., action buttons).
+ * @param properties [DialogProperties] controlling dismiss behavior and platform width.
  */
 @Composable
 fun Dialog(
@@ -48,46 +50,47 @@ fun Dialog(
     modifier: Modifier = Modifier,
     header: (@Composable ColumnScope.() -> Unit)? = null,
     body: (@Composable ColumnScope.() -> Unit)? = null,
-    footer: (@Composable RowScope.() -> Unit)? = null
+    footer: (@Composable RowScope.() -> Unit)? = null,
+    properties: DialogProperties = DialogProperties()
 ) {
     val styles = MaterialTheme.styles
     val radius = MaterialTheme.radius
 
     if (open) {
-        ComposeDialog(onDismissRequest = onDismissRequest) {
+        ComposeDialog(onDismissRequest = onDismissRequest, properties = properties) {
             Column(
                 modifier = modifier
                     .fillMaxWidth()
                     .background(styles.background, RoundedCornerShape(radius.lg))
                     .border(1.dp, styles.border, RoundedCornerShape(radius.lg))
                     .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                header?.let {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            content = it
-                        )
+                // Close affordance is always rendered (shadcn always shows the X), even headerless.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        content = header ?: {}
+                    )
 
-                        Box(
-                            modifier = Modifier
-                                .offset(y = (-16).dp, x = (16).dp),
+                    Box(
+                        modifier = Modifier
+                            .offset(y = (-16).dp, x = (16).dp),
+                    ) {
+                        Button(
+                            variant = ButtonVariant.Ghost,
+                            size = ButtonSize.Icon,
+                            onClick = onDismissRequest
                         ) {
-                            IconButton(
-                                onClick = onDismissRequest,
-                                size = ButtonSize.IconSm,
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close dialog",
-                                    tint = styles.mutedForeground
-                                )
-                            }
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = styles.mutedForeground
+                            )
                         }
                     }
                 }
