@@ -36,11 +36,10 @@ fun Slider(
     ComposeSlider(
         value = value,
         onValueChange = onValueChange,
-        // Defaults before the caller modifier so a caller can size the slider (narrower/taller).
-        modifier = Modifier
+        // Caller modifier starts the chain; defaults follow so a caller can override size.
+        modifier = modifier
             .fillMaxWidth()
-            .height(20.dp)
-            .then(modifier),
+            .height(20.dp),
         valueRange = valueRange,
         steps = steps,
         enabled = enabled,

@@ -153,10 +153,9 @@ fun Drawer(
             properties = ModalBottomSheetProperties(shouldDismissOnBackPress),
         ) {
             Column(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .then(modifier)
             ) {
                 // Header (Title and Description)
                 Row(

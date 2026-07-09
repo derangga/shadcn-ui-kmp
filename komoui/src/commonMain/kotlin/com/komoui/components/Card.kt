@@ -45,7 +45,7 @@ fun Card(
 ) {
     val styles = MaterialTheme.styles
     Box(
-        modifier = Modifier
+        modifier = modifier
             .drawShadows(radius, shadow)
             .clip(RoundedCornerShape(radius))
             .border(1.dp, styles.border, RoundedCornerShape(radius))
@@ -55,8 +55,7 @@ fun Card(
                 .background(
                     color = MaterialTheme.styles.card,
                     shape = RoundedCornerShape(radius)
-                )
-                .then(modifier), content = content
+                ), content = content
         )
     }
 }
@@ -74,10 +73,9 @@ fun CardHeader(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .then(modifier),
+            .padding(16.dp),
         horizontalAlignment = horizontalAlignment,
         content = content
     )
@@ -147,10 +145,9 @@ fun CardContent(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .then(modifier),
+            .padding(horizontal = 16.dp),
         horizontalAlignment = horizontalAlignment,
         content = content
     )
@@ -171,10 +168,9 @@ fun CardFooter(
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .then(modifier),
+            .padding(16.dp),
         horizontalArrangement = horizontalArrangement,
         verticalAlignment = Alignment.CenterVertically,
         content = content

@@ -239,9 +239,9 @@ fun Button(
     val isEnabled = enabled && !loading
 
     val baseModifier = if (fullWidth) {
-        Modifier.then(minHeightModifier).fillMaxWidth().then(modifier)
+        modifier.then(minHeightModifier).fillMaxWidth()
     } else {
-        Modifier.then(minHeightModifier).then(modifier)
+        modifier.then(minHeightModifier)
     }
 
     // Use TextButton for Ghost and Link variants to match behavior and remove default elevation

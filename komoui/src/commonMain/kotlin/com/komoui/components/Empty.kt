@@ -44,10 +44,9 @@ fun Empty(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(24.dp)
-            .then(modifier),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp),
         content = content
@@ -66,9 +65,8 @@ fun EmptyHeader(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .widthIn(max = 384.dp)
-            .then(modifier),
+        modifier = modifier
+            .widthIn(max = 384.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         content = content
@@ -94,9 +92,8 @@ fun EmptyMedia(
     when (variant) {
         EmptyMediaVariant.Default -> {
             Box(
-                modifier = Modifier
-                    .padding(bottom = 8.dp)
-                    .then(modifier),
+                modifier = modifier
+                    .padding(bottom = 8.dp),
                 contentAlignment = Alignment.Center,
                 content = content
             )
@@ -104,14 +101,13 @@ fun EmptyMedia(
 
         EmptyMediaVariant.Icon -> {
             Box(
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = modifier.padding(bottom = 8.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(MaterialTheme.radius.lg))
-                        .background(styles.muted)
-                        .then(modifier),
+                        .background(styles.muted),
                     contentAlignment = Alignment.Center
                 ) {
                     CompositionLocalProvider(LocalContentColor provides styles.foreground) {
@@ -187,10 +183,9 @@ fun EmptyContent(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .widthIn(max = 384.dp)
-            .then(modifier),
+            .widthIn(max = 384.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         content = content
