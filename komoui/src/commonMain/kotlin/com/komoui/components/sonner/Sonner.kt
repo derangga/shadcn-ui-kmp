@@ -29,6 +29,7 @@ import com.komoui.components.ButtonVariant
 import com.komoui.themes.radius
 import androidx.compose.ui.graphics.Color
 import com.komoui.themes.KomoStyles
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 
@@ -105,7 +106,7 @@ fun Sonner(
                     ) {
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "close",
+                            contentDescription = MaterialTheme.komoStrings.close,
                             tint = styles.destructiveForeground
                         )
                     }
@@ -116,7 +117,7 @@ fun Sonner(
                         size = ButtonSize.Icon,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Icon(Icons.Default.Close, contentDescription = "close")
+                        Icon(Icons.Default.Close, contentDescription = MaterialTheme.komoStrings.close)
                     }
                 }
             }

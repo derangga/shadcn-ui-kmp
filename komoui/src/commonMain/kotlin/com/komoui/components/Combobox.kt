@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 import kotlin.math.roundToInt
@@ -216,7 +217,7 @@ fun ComboBox(
                             value = searchText,
                             onValueChange = { searchText = it },
                             variant = InputVariant.Underlined,
-                            placeholder = "Search options...",
+                            placeholder = MaterialTheme.komoStrings.searchPlaceholder,
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "search") },
                             singleLine = true,
                             focusRequester = searchFocusRequester,
@@ -224,7 +225,7 @@ fun ComboBox(
 
                         if (filteredOptions.isEmpty()) {
                             Text(
-                                text = "No results found.",
+                                text = MaterialTheme.komoStrings.noResultsFound,
                                 color = styles.mutedForeground,
                                 modifier = Modifier
                                     .fillMaxWidth()

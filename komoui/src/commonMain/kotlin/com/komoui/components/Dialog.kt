@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
 import androidx.compose.ui.window.Dialog as ComposeDialog
 import androidx.compose.ui.window.DialogProperties
@@ -91,7 +92,7 @@ fun Dialog(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
+                                contentDescription = MaterialTheme.komoStrings.closeDialog,
                                 tint = styles.mutedForeground
                             )
                         }

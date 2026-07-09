@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
 import com.komoui.themes.radius
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 
@@ -297,7 +298,7 @@ fun PaginationScope.DefaultPagination() {
             size = ButtonSize.Sm,
             enabled = canPrev
         ) {
-            Text("Previous")
+            Text(MaterialTheme.komoStrings.previous)
         }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
@@ -306,7 +307,7 @@ fun PaginationScope.DefaultPagination() {
             size = ButtonSize.Sm,
             enabled = canNext
         ) {
-            Text("Next")
+            Text(MaterialTheme.komoStrings.next)
         }
     }
 }
@@ -478,7 +479,7 @@ fun <T> DataTable(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No results.",
+                                    text = MaterialTheme.komoStrings.noResults,
                                     color = styles.mutedForeground,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -538,13 +539,16 @@ fun <T> DataTable(
         ) {
             if (enableSelection) {
                 Text(
-                    text = "${selectedKeySet.size} of ${sorted.size} row(s) selected.",
+                    text = MaterialTheme.komoStrings.rowsSelected(selectedKeySet.size, sorted.size),
                     color = styles.mutedForeground,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             Text(
-                text = "Page ${paginationScope.page + 1} of ${paginationScope.pageCount}",
+                text = MaterialTheme.komoStrings.pageIndicator(
+                    paginationScope.page + 1,
+                    paginationScope.pageCount,
+                ),
                 color = styles.mutedForeground,
                 style = MaterialTheme.typography.bodySmall
             )
