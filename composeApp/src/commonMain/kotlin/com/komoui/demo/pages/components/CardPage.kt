@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -59,9 +60,10 @@ fun CardPage(nav: NavHostController) {
                 modifier = Modifier.border(0.dp, Color.Unspecified)
             ) {
                 AsyncImage(
-                    "https://heroui.com/images/hero-card.jpeg",
-                    contentDescription = "",
-                    modifier = Modifier.size(200.dp)
+                    "https://img.magnific.com/free-photo/young-woman-listening-music-home_23-2149029679.jpg",
+                    contentDescription = "sample image",
+                    modifier = Modifier.size(200.dp),
+                    contentScale = ContentScale.Crop
                 )
             }
         }

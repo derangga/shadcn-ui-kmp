@@ -56,11 +56,10 @@ fun Avatar(
     val styles = MaterialTheme.styles
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .border(1.dp, styles.border, CircleShape)
-            .then(modifier),
+            .border(1.dp, styles.border, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         if (model == null) {
