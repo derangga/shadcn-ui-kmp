@@ -32,6 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -144,6 +147,12 @@ fun InputOTP(
         },
         modifier = modifier
             .minimumInteractiveComponentSize()
+            // The visible slots are plain Boxes and the real field is size(0).alpha(0); without
+            // this the component is invisible to screen readers. Describe progress + error state.
+            .semantics {
+                contentDescription = "Verification code, ${sanitized.length} of $length digits entered"
+                if (isError) error("Invalid verification code")
+            }
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
         enabled = enabled,
         readOnly = readOnly,

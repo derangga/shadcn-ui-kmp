@@ -15,7 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -58,6 +61,7 @@ fun Sonner(
     val (containerColor, contentColor, actionContentColor, border) = resolveSonnerColors(variant, styles)
     Snackbar(
         modifier = modifier
+            .semantics { liveRegion = LiveRegionMode.Polite }
             .padding(16.dp)
             .border(1.dp, border, RoundedCornerShape(radius.lg)),
         action = if (actionLabel != null && onActionClick != null) {
