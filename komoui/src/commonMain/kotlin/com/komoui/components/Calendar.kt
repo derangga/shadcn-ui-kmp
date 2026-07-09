@@ -550,8 +550,14 @@ fun Calendar(
                                 isToday && isCurrentMonth -> cellBgStyle.todayUnselectedBg
                                 else -> cellBgStyle.defaultDateCell
                             }
+                            // Avoid animateColorAsState fading through black: Color.Transparent is
+                            // (0,0,0, alpha 0), so tweening a transparent cell to a light fill (in-range
+                            // accent) passes through muddy grey. Swap a transparent target for a same-hue
+                            // zero-alpha color so transparent<->fill transitions animate alpha only.
+                            val animTarget = if (targetBackground.alpha == 0f)
+                                themeColors.accent.copy(alpha = 0f) else targetBackground
                             val backgroundColor = animateColorAsState(
-                                targetValue = targetBackground,
+                                targetValue = animTarget,
                                 animationSpec = tween(durationMillis = 100),
                                 label = "dayBackground"
                             ).value

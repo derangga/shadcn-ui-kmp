@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -52,6 +51,7 @@ import com.komoui.components.Button
 import com.komoui.components.ButtonSize
 import com.komoui.components.ButtonVariant
 import com.komoui.components.Dialog
+import com.komoui.components.DialogTitle
 import com.komoui.components.Input
 import com.komoui.components.sidebar.Sidebar
 import com.komoui.components.sidebar.SidebarCollapsible
@@ -237,6 +237,7 @@ fun MainLayout(rootNav: NavHostController, viewModel: MainViewModel, isDark: Boo
     Dialog(
         open = showDialog,
         onDismissRequest = { showDialog = false },
+        header = { DialogTitle { Text("Search Component") } },
         body = {
             Column(
                 modifier = Modifier
@@ -252,12 +253,14 @@ fun MainLayout(rootNav: NavHostController, viewModel: MainViewModel, isDark: Boo
                     placeholder = "Search components",
                     singleLine = true,
                     trailingIcon = {
-                        Box(
-                            modifier = Modifier.clickable {
-                                showDialog = false
+                        if (searchTxt.isNotBlank()) {
+                            Box(
+                                modifier = Modifier.clickable {
+                                    showDialog = false
+                                }
+                            ) {
+                                Icon(Icons.Default.Close, contentDescription = "close")
                             }
-                        ) {
-                            Icon(Icons.Default.Close, contentDescription = "close")
                         }
                     }
                 )

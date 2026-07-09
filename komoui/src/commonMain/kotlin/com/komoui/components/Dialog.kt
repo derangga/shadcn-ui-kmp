@@ -64,7 +64,7 @@ fun Dialog(
                     .background(styles.background, RoundedCornerShape(radius.lg))
                     .border(1.dp, styles.border, RoundedCornerShape(radius.lg))
                     .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Close affordance is always rendered (shadcn always shows the X), even headerless.
                 Row(
@@ -81,9 +81,10 @@ fun Dialog(
                         modifier = Modifier
                             .offset(y = (-16).dp, x = (16).dp),
                     ) {
-                        IconButton(
-                            onClick = onDismissRequest,
-                            size = ButtonSize.IconSm,
+                        Button(
+                            variant = ButtonVariant.Ghost,
+                            size = ButtonSize.Icon,
+                            onClick = onDismissRequest
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,

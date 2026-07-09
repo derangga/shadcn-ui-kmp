@@ -138,8 +138,12 @@ fun SidebarProvider(
             LocalSidebarState provides state,
             LocalSidebarSlots provides slots,
         ) {
-            slots.sidebar = null
-            slots.inset = null
+            // intentionally NOT reset to null here. Nulling every recomposition
+            // blanks the layout when a child (Sidebar/SidebarInset) skips re-registration —
+            // the snapshot-backed slot invalidates the reader, which then renders null.
+            // A skipping child means its content is unchanged, so its last lambda is still
+            // valid. Add DisposableEffect-based clearing only if a conditionally-mounted
+            // Sidebar/SidebarInset use case appears.
             // Children (Sidebar, SidebarInset) register their content into `slots` and emit nothing.
             content()
             // Render the captured slots in the layout appropriate for the viewport.
