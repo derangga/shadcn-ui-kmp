@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -208,6 +209,7 @@ fun Calendar(
     initialMonth: YearMonth = YearMonth.now(),
     month: YearMonth? = null,
     onMonthChange: ((YearMonth) -> Unit)? = null,
+    enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors()
 ) {
@@ -220,6 +222,7 @@ fun Calendar(
         initialMonth = initialMonth,
         month = month,
         onMonthChange = onMonthChange,
+        enabled = enabled,
         dateSelectionMode = dateSelectionMode,
         colors = colors
     )
@@ -245,6 +248,7 @@ fun Calendar(
     initialMonth: YearMonth = YearMonth.now(),
     month: YearMonth? = null,
     onMonthChange: ((YearMonth) -> Unit)? = null,
+    enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors()
 ) {
@@ -308,6 +312,7 @@ fun Calendar(
 
     Box(
         modifier = modifier
+            .alpha(if (enabled) 1f else 0.5f)
             .widthIn(max = 300.dp)
     ) {
         Column(
@@ -321,7 +326,7 @@ fun Calendar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { setMonth(currentMonth.minusMonths(1)) }) {
+                IconButton(onClick = { setMonth(currentMonth.minusMonths(1)) }, enabled = enabled) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
                         contentDescription = "Previous Month",
@@ -338,7 +343,7 @@ fun Calendar(
                         modifier = Modifier
                             .clip(RoundedCornerShape(radius.md))
                             .border(1.dp, colors.monthSelectorBorder, RoundedCornerShape(radius.md))
-                            .clickable { showMonthPicker = true }
+                            .clickable(enabled = enabled) { showMonthPicker = true }
                             .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -364,7 +369,7 @@ fun Calendar(
                         modifier = Modifier
                             .clip(RoundedCornerShape(radius.md))
                             .border(1.dp, colors.yearSelectorBorder, RoundedCornerShape(radius.md))
-                            .clickable { showYearPicker = true }
+                            .clickable(enabled = enabled) { showYearPicker = true }
                             .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -386,7 +391,7 @@ fun Calendar(
                     }
                 }
 
-                IconButton(onClick = { setMonth(currentMonth.plusMonths(1)) }) {
+                IconButton(onClick = { setMonth(currentMonth.plusMonths(1)) }, enabled = enabled) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
                         contentDescription = "Next Month",
@@ -478,7 +483,7 @@ fun Calendar(
                             val isToday = date == today
 
                             // Logic for date clickability based on dateSelectionMode
-                            val isClickable = when (dateSelectionMode) {
+                            val isClickable = enabled && when (dateSelectionMode) {
                                 DateSelectionMode.All -> true
                                 DateSelectionMode.PastOrToday -> date <= today
                                 DateSelectionMode.FutureOrToday -> date >= today

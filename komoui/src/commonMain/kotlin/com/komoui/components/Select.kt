@@ -54,6 +54,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.styles
+import com.komoui.themes.komoTypography
 import com.komoui.utils.komoClickable
 import com.komoui.utils.rememberAnchoredPopupPositionProvider
 
@@ -80,7 +81,9 @@ fun <T> Select(
     label: (T) -> String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    placeholder: String = "Select option..."
+    placeholder: String = "Select option...",
+    isError: Boolean = false,
+    supportingText: String? = null
 ) {
     val styles = MaterialTheme.styles
     val radius = MaterialTheme.radius
@@ -96,7 +99,11 @@ fun <T> Select(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val currentBorderColor by animateColorAsState(
-        targetValue = if (enabled && (isFocused || isPressed || expanded)) styles.ring else styles.border,
+        targetValue = when {
+            isError -> styles.destructive
+            enabled && (isFocused || isPressed || expanded) -> styles.ring
+            else -> styles.border
+        },
         animationSpec = tween(150), label = "selectBorderColor"
     )
 
@@ -150,6 +157,15 @@ fun <T> Select(
                         .graphicsLayer { rotationZ = arrowRotation }
                 )
             }
+        }
+
+        if (supportingText != null) {
+            Text(
+                text = supportingText,
+                color = if (isError) styles.destructive else styles.mutedForeground,
+                style = MaterialTheme.komoTypography.label,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         // Dropdown Popup
@@ -246,7 +262,9 @@ fun Select(
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    placeholder: String = "Select option..."
+    placeholder: String = "Select option...",
+    isError: Boolean = false,
+    supportingText: String? = null
 ) {
     Select(
         options = options,
@@ -255,6 +273,8 @@ fun Select(
         label = { it },
         modifier = modifier,
         enabled = enabled,
-        placeholder = placeholder
+        placeholder = placeholder,
+        isError = isError,
+        supportingText = supportingText
     )
 }

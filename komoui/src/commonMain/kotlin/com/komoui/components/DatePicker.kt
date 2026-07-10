@@ -35,6 +35,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.KomoFieldDefaults
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 import com.komoui.utils.rememberAnchoredPopupPositionProvider
@@ -104,6 +105,8 @@ fun DatePicker(
     dateTimeFormat: DateFormatter? = null,
     placeholder: String = "Pick a date",
     enabled: Boolean = true,
+    isError: Boolean = false,
+    supportingText: String? = null,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors(),
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -118,6 +121,8 @@ fun DatePicker(
         hasValue = selectedDate != null,
         placeholder = placeholder,
         enabled = enabled,
+        isError = isError,
+        supportingText = supportingText,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
     ) { onDismiss ->
@@ -144,6 +149,8 @@ fun DateRangePicker(
     dateTimeFormat: DateFormatter? = null,
     placeholder: String = "Pick a date range",
     enabled: Boolean = true,
+    isError: Boolean = false,
+    supportingText: String? = null,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors(),
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -160,6 +167,8 @@ fun DateRangePicker(
         hasValue = selectedRange != null,
         placeholder = placeholder,
         enabled = enabled,
+        isError = isError,
+        supportingText = supportingText,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
     ) { onDismiss ->
@@ -190,6 +199,8 @@ private fun DatePickerScaffold(
     hasValue: Boolean,
     placeholder: String,
     enabled: Boolean,
+    isError: Boolean,
+    supportingText: String?,
     leadingIcon: @Composable (() -> Unit)?,
     trailingIcon: @Composable (() -> Unit)?,
     popover: @Composable (onDismiss: () -> Unit) -> Unit,
@@ -203,7 +214,11 @@ private fun DatePickerScaffold(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
     val currentBorderColor by animateColorAsState(
-        targetValue = if (isFocused || isPressed || showCalendarPopup) themeColors.ring else themeColors.border,
+        targetValue = when {
+            isError -> themeColors.destructive
+            isFocused || isPressed || showCalendarPopup -> themeColors.ring
+            else -> themeColors.border
+        },
         animationSpec = tween(150), label = "datePickerBorderColor"
     )
 
@@ -245,6 +260,15 @@ private fun DatePickerScaffold(
                     trailingIcon()
                 }
             }
+        }
+
+        if (supportingText != null) {
+            Text(
+                text = supportingText,
+                color = if (isError) themeColors.destructive else themeColors.mutedForeground,
+                style = MaterialTheme.komoTypography.label,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         if (showCalendarPopup) {

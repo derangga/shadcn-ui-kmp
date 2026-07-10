@@ -53,6 +53,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
 import com.komoui.themes.KomoFieldDefaults
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 import com.komoui.utils.rememberAnchoredPopupPositionProvider
@@ -78,6 +79,8 @@ fun ComboBox(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     placeholder: String = "Select option...",
+    isError: Boolean = false,
+    supportingText: String? = null,
     dropdownMaxHeight: Dp = 200.dp
 ) {
     val styles = MaterialTheme.styles
@@ -111,6 +114,7 @@ fun ComboBox(
 
     val currentBorderColor by animateColorAsState(
         targetValue = when {
+            isError -> styles.destructive
             !enabled -> styles.border
             isFocused || isPressed || expanded -> styles.ring
             else -> styles.border
@@ -177,6 +181,15 @@ fun ComboBox(
                     modifier = Modifier.size(20.dp)
                 )
             }
+        }
+
+        if (supportingText != null) {
+            Text(
+                text = supportingText,
+                color = if (isError) styles.destructive else styles.mutedForeground,
+                style = MaterialTheme.komoTypography.label,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         // Dropdown Popup
