@@ -15,6 +15,9 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +57,7 @@ fun Alert(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .semantics { liveRegion = LiveRegionMode.Polite }
             .background(colors.backgroundColor, RoundedCornerShape(radius.md))
             .border(BorderStroke(1.dp, colors.borderColors), RoundedCornerShape(radius.md))
             .padding(16.dp)

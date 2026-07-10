@@ -28,6 +28,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
@@ -109,7 +111,14 @@ fun BarChart(
     val effectiveShowTooltip = showTooltip && !scrollable
     val plotAxisOptions = remember(axisOptions) { axisOptions.copy(showY = false) }
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription =
+                    chartSemanticsLabel(series.map { it.label }, series.firstOrNull()?.points?.size ?: 0)
+            }
+    ) {
         Row(modifier = Modifier.fillMaxWidth().height(chartHeight)) {
             // Pinned y-axis canvas
             if (axisOptions.showY) {

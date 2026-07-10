@@ -1,7 +1,6 @@
 package com.komoui.components.sonner
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +12,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,7 +29,9 @@ import com.komoui.components.ButtonVariant
 import com.komoui.themes.radius
 import androidx.compose.ui.graphics.Color
 import com.komoui.themes.KomoStyles
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 
 /**
  * A styled snackbar component inspired by the Sonner toast library.
@@ -56,6 +62,7 @@ fun Sonner(
     val (containerColor, contentColor, actionContentColor, border) = resolveSonnerColors(variant, styles)
     Snackbar(
         modifier = modifier
+            .semantics { liveRegion = LiveRegionMode.Polite }
             .padding(16.dp)
             .border(1.dp, border, RoundedCornerShape(radius.lg)),
         action = if (actionLabel != null && onActionClick != null) {
@@ -64,7 +71,12 @@ fun Sonner(
                     Box(
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .clickable(onClick = onActionClick)
+                            .komoClickable(
+                                onClick = onActionClick,
+                                role = Role.Button,
+                                shape = RoundedCornerShape(radius.sm),
+                            )
+                            .minimumInteractiveComponentSize()
                     ) {
                         Text(actionLabel, color = styles.destructiveForeground)
                     }
@@ -85,11 +97,16 @@ fun Sonner(
                     Box(
                         modifier = Modifier
                             .padding(end = 16.dp)
-                            .clickable(onClick = onDismiss)
+                            .komoClickable(
+                                onClick = onDismiss,
+                                role = Role.Button,
+                                shape = RoundedCornerShape(radius.sm),
+                            )
+                            .minimumInteractiveComponentSize()
                     ) {
                         Icon(
                             Icons.Default.Close,
-                            contentDescription = "close",
+                            contentDescription = MaterialTheme.komoStrings.close,
                             tint = styles.destructiveForeground
                         )
                     }
@@ -100,7 +117,7 @@ fun Sonner(
                         size = ButtonSize.Icon,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Icon(Icons.Default.Close, contentDescription = "close")
+                        Icon(Icons.Default.Close, contentDescription = MaterialTheme.komoStrings.close)
                     }
                 }
             }

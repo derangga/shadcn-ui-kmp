@@ -412,6 +412,22 @@ internal fun DrawScope.drawScrubIndicator(
 }
 
 /**
+ * Screen-reader summary for a chart (series labels + points-per-series). The chart itself is a
+ * silent Canvas; apply this via `semantics { contentDescription = ... }` on the chart root.
+ * See issue shadcn-ui-kmp-mjl.3.
+ */
+internal fun chartSemanticsLabel(seriesLabels: List<String>, pointCount: Int): String =
+    buildString {
+        append("Chart, ")
+        append(seriesLabels.size)
+        append(" series (")
+        append(seriesLabels.joinToString(", "))
+        append("), ")
+        append(pointCount)
+        append(" data points each")
+    }
+
+/**
  * Small flow-row of color-dot + label chips, rendered below the chart when enabled.
  */
 @Composable

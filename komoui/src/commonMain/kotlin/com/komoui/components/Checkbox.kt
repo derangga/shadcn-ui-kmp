@@ -8,12 +8,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoToggleable
 
 /**
  * A Jetpack Compose Checkbox component for KomoUI.
@@ -88,18 +89,20 @@ fun Checkbox(
 
     Box(
         modifier = modifier
-            .size(24.dp)
-            .clip(RoundedCornerShape(radius.sm))
-            .background(backgroundColor)
-            .border(1.dp, currentBorderColor, RoundedCornerShape(radius.sm))
-            .toggleable(
+            .komoToggleable(
                 value = checked,
                 onValueChange = { newChecked -> onCheckedChange?.invoke(newChecked) },
                 enabled = enabled,
                 role = Role.Checkbox,
+                shape = RoundedCornerShape(radius.sm),
                 interactionSource = interactionSource,
-                indication = null
-            ),
+            )
+            // Expands the touch target to 48.dp; the 24.dp visual stays (must follow min-size).
+            .minimumInteractiveComponentSize()
+            .size(24.dp)
+            .clip(RoundedCornerShape(radius.sm))
+            .background(backgroundColor)
+            .border(1.dp, currentBorderColor, RoundedCornerShape(radius.sm)),
         contentAlignment = Alignment.Center
     ) {
         if (checked) {

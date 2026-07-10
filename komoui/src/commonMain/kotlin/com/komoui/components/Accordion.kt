@@ -7,8 +7,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,11 +30,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 
 /**
  * Data class to represent an individual item in the Accordion.
@@ -112,17 +112,18 @@ fun Accordion(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            val next = if (singleItemExpand) {
-                                if (isExpanded) emptySet() else setOf(item.id)
-                            } else {
-                                if (isExpanded) expandedItems - item.id else expandedItems + item.id
-                            }
-                            setOpen(next)
-                        }
+                        .komoClickable(
+                            role = Role.Button,
+                            stateDescription = if (isExpanded) "Expanded" else "Collapsed",
+                            onClick = {
+                                val next = if (singleItemExpand) {
+                                    if (isExpanded) emptySet() else setOf(item.id)
+                                } else {
+                                    if (isExpanded) expandedItems - item.id else expandedItems + item.id
+                                }
+                                setOpen(next)
+                            },
+                        )
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -140,7 +141,8 @@ fun Accordion(
 
                     Icon(
                         imageVector = chevron,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        // Decorative: the header row already announces expanded/collapsed state.
+                        contentDescription = null,
                         tint = styles.foreground,
                         modifier = Modifier
                             .rotate(rotation)

@@ -2,7 +2,6 @@ package com.komoui.components.sidebar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -22,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.komoui.components.Skeleton
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 
 // ---------------------------------------------------------------------------
 // Variant and size enums (mirror React CVA variants).
@@ -149,7 +151,12 @@ fun SidebarMenuButton(
                     .clip(shape)
                     .background(outlineBackground)
                     .then(borderModifier)
-                    .clickable(onClick = clickHandler),
+                    .komoClickable(
+                        onClick = clickHandler,
+                        role = Role.Button,
+                        shape = shape,
+                        stateDescription = if (isActive) "Selected" else null,
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 icon?.invoke()
@@ -162,7 +169,12 @@ fun SidebarMenuButton(
                     .clip(shape)
                     .background(outlineBackground)
                     .then(borderModifier)
-                    .clickable(onClick = clickHandler)
+                    .komoClickable(
+                        onClick = clickHandler,
+                        role = Role.Button,
+                        shape = shape,
+                        stateDescription = if (isActive) "Selected" else null,
+                    )
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -246,9 +258,14 @@ fun SidebarMenuAction(
     Box(
         modifier = modifier
             .padding(end = 4.dp)
+            .komoClickable(
+                onClick = onClick,
+                role = Role.Button,
+                shape = RoundedCornerShape(MaterialTheme.radius.sm),
+            )
+            .minimumInteractiveComponentSize()
             .size(20.dp)
-            .clip(RoundedCornerShape(MaterialTheme.radius.sm))
-            .clickable(onClick = onClick),
+            .clip(RoundedCornerShape(MaterialTheme.radius.sm)),
         contentAlignment = Alignment.Center,
         content = { content() },
     )
@@ -378,7 +395,12 @@ fun SidebarMenuSubButton(
             .heightIn(min = height)
             .clip(shape)
             .background(backgroundColor)
-            .clickable(onClick = clickHandler)
+            .komoClickable(
+                onClick = clickHandler,
+                role = Role.Button,
+                shape = shape,
+                stateDescription = if (isActive) "Selected" else null,
+            )
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),

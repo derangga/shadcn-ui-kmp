@@ -30,6 +30,7 @@ internal val LocalKomoDarkMode = staticCompositionLocalOf { false }
  * @param materialLightColors The Material 3 [ColorScheme] to be used for the light theme. Defaults to [lightColorScheme].
  * @param materialDarkColors The Material 3 [ColorScheme] to be used for the dark theme. Defaults to [darkColorScheme].
  * @param komoRadius The [KomoRadius] to be used. Defaults to [Radius].
+ * @param strings The [KomoStrings] (localizable labels/descriptions) to be used. Defaults to English.
  * @param typography The Material 3 [Typography] to be used. Defaults to [DefaultTypography].
  * @param content The composable content to be themed.
  */
@@ -41,6 +42,7 @@ fun KomoTheme(
     materialLightColors: ColorScheme = lightColorScheme(),
     materialDarkColors: ColorScheme = darkColorScheme(),
     komoRadius: KomoRadius = Radius,
+    strings: KomoStrings = KomoStrings(),
     typography: Typography? = null,
     content: @Composable () -> Unit,
 ) {
@@ -49,6 +51,7 @@ fun KomoTheme(
     CompositionLocalProvider(
         LocalKomoStyles provides colors,
         LocalKomoRadius provides komoRadius,
+        LocalKomoStrings provides strings,
         LocalKomoDarkMode provides isDarkTheme
     ) {
         MaterialTheme(

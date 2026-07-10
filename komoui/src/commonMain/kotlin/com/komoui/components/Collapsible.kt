@@ -6,8 +6,6 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -17,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import com.komoui.utils.komoClickable
 
 /**
  * Scope exposing the [CollapsibleTrigger] and [CollapsibleContent] slots inside a
@@ -43,15 +43,13 @@ class CollapsibleScope internal constructor(
         verticalAlignment: Alignment.Vertical = Alignment.Top,
         content: @Composable RowScope.() -> Unit
     ) {
-        val interactionSource = remember { MutableInteractionSource() }
         Row(
-            modifier = modifier.clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                enabled = enabled
-            ) {
-                onOpenChange(!open)
-            },
+            modifier = modifier.komoClickable(
+                onClick = { onOpenChange(!open) },
+                enabled = enabled,
+                role = Role.Button,
+                stateDescription = if (open) "Expanded" else "Collapsed",
+            ),
             horizontalArrangement = horizontalArrangement,
             verticalAlignment = verticalAlignment,
             content = content

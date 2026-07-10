@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -146,6 +148,8 @@ fun Input(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 44.dp)
+                // Expose the error state to screen readers (visual-only border color otherwise).
+                .then(if (isError) Modifier.semantics { error("Invalid input") } else Modifier)
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .then(borderStyle),
             enabled = enabled,

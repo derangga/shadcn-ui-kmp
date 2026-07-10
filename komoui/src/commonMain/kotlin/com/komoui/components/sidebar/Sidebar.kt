@@ -37,6 +37,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +51,7 @@ import com.komoui.components.ButtonVariant
 import com.komoui.components.Input
 import com.komoui.components.InputVariant
 import com.komoui.themes.drawShadows
+import com.komoui.themes.komoStrings
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -223,14 +226,23 @@ private fun BoxScope.RailOverlay(side: SidebarSide) {
     val state = LocalSidebarState.current
     val styles = MaterialTheme.styles
 
+    // ponytail: 20.dp hit strip, not the full 48.dp — a 48-wide rail would overlap sidebar
+    // content along the whole edge. Widen further only if touch misses are reported.
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .width(4.dp)
+            .width(20.dp)
             .align(if (side == SidebarSide.Left) Alignment.CenterEnd else Alignment.CenterStart)
-            .background(styles.sidebarBorder)
             .clickable { state.toggleSidebar() },
-    )
+        contentAlignment = if (side == SidebarSide.Left) Alignment.CenterEnd else Alignment.CenterStart,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(4.dp)
+                .background(styles.sidebarBorder),
+        )
+    }
 }
 
 /**
@@ -328,15 +340,18 @@ fun SidebarTrigger(
     content: @Composable () -> Unit = {
         Icon(
             Icons.Default.Menu,
-            contentDescription = "Toggle Sidebar",
+            contentDescription = MaterialTheme.komoStrings.toggleSidebar,
             tint = MaterialTheme.styles.sidebarForeground,
         )
     },
 ) {
     val state = LocalSidebarState.current
+    val strings = MaterialTheme.komoStrings
     Button(
         onClick = { state.toggleSidebar() },
-        modifier = modifier,
+        modifier = modifier.semantics {
+            stateDescription = if (state.isOpen) strings.expanded else strings.collapsed
+        },
         size = ButtonSize.Icon,
         variant = ButtonVariant.Ghost,
     ) {

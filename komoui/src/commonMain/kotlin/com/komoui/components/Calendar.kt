@@ -40,6 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +51,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
+import com.komoui.utils.komoSelectable
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -169,55 +174,6 @@ private fun Month.length(isLeapYear: Boolean): Int {
     }
 }
 
-// Helper function to get short weekday names
-private fun DayOfWeek.getShortName(): String {
-    return when (this) {
-        DayOfWeek.MONDAY -> "Mon"
-        DayOfWeek.TUESDAY -> "Tue"
-        DayOfWeek.WEDNESDAY -> "Wed"
-        DayOfWeek.THURSDAY -> "Thu"
-        DayOfWeek.FRIDAY -> "Fri"
-        DayOfWeek.SATURDAY -> "Sat"
-        DayOfWeek.SUNDAY -> "Sun"
-    }
-}
-
-// Helper function to get full month name
-private fun Month.getFullName(): String {
-    return when (this) {
-        Month.JANUARY -> "January"
-        Month.FEBRUARY -> "February"
-        Month.MARCH -> "March"
-        Month.APRIL -> "April"
-        Month.MAY -> "May"
-        Month.JUNE -> "June"
-        Month.JULY -> "July"
-        Month.AUGUST -> "August"
-        Month.SEPTEMBER -> "September"
-        Month.OCTOBER -> "October"
-        Month.NOVEMBER -> "November"
-        Month.DECEMBER -> "December"
-    }
-}
-
-// Helper function to get short month name
-private fun Month.getShortName(): String {
-    return when (this) {
-        Month.JANUARY -> "Jan"
-        Month.FEBRUARY -> "Feb"
-        Month.MARCH -> "Mar"
-        Month.APRIL -> "Apr"
-        Month.MAY -> "May"
-        Month.JUNE -> "Jun"
-        Month.JULY -> "Jul"
-        Month.AUGUST -> "Aug"
-        Month.SEPTEMBER -> "Sep"
-        Month.OCTOBER -> "Oct"
-        Month.NOVEMBER -> "Nov"
-        Month.DECEMBER -> "Dec"
-    }
-}
-
 /**
  * Converts a [DayOfWeek] to a Sunday-start index (Sunday=0, Monday=1, ..., Saturday=6).
  */
@@ -284,6 +240,7 @@ fun Calendar(
 ) {
     val themeColors = MaterialTheme.styles
     val radius = MaterialTheme.radius
+    val strings = MaterialTheme.komoStrings
     // Keyed on initialMonth so the view navigates when the caller changes it after first composition.
     var currentMonth by remember(initialMonth) { mutableStateOf(initialMonth) }
     val today = remember {
@@ -314,7 +271,7 @@ fun Calendar(
     }
 
     // Weekday names (e.g., "Sun", "Mon")
-    val weekdays = remember {
+    val weekdays = remember(strings) {
         listOf(
             DayOfWeek.SUNDAY,
             DayOfWeek.MONDAY,
@@ -323,7 +280,7 @@ fun Calendar(
             DayOfWeek.THURSDAY,
             DayOfWeek.FRIDAY,
             DayOfWeek.SATURDAY
-        ).map { it.getShortName() }
+        ).map { strings.weekdayNamesShort[it.ordinal] }
     }
 
     // Pre-compute text styles used in the day grid
@@ -371,7 +328,7 @@ fun Calendar(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = currentMonth.month.getShortName(),
+                                text = strings.monthNamesShort[currentMonth.month.ordinal],
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium
@@ -599,11 +556,13 @@ fun Calendar(
                                     .aspectRatio(1f)
                                     .clip(shape)
                                     .background(backgroundColor)
-                                    .clickable(
+                                    .komoSelectable(
+                                        selected = isSelected,
                                         enabled = isClickable,
+                                        role = Role.Button,
+                                        shape = shape,
                                         interactionSource = interactionSource,
-                                        indication = null
-                                    ) {
+                                        onClick = {
                                         when (selectionMode) {
                                             is CalendarSelectionMode.Single -> {
                                                 selectionMode.onDateSelected(date)
@@ -635,7 +594,9 @@ fun Calendar(
                                         if (!isCurrentMonth) {
                                             currentMonth = YearMonth.from(date)
                                         }
-                                    },
+                                        },
+                                    )
+                                    .semantics { contentDescription = date.toString() },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -734,7 +695,7 @@ private fun MonthPickerDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = month.getFullName(),
+                            text = MaterialTheme.komoStrings.monthNamesFull[month.ordinal],
                             style = TextStyle(
                                 color = textColor,
                                 fontSize = 16.sp,

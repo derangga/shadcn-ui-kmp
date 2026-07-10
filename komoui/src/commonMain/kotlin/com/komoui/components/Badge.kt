@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -45,6 +47,8 @@ enum class BadgeVariant {
  *   selected [variant] — set this when supplying a custom [backgroundColor] to keep text readable.
  * @param roundedSize The corner radius for the badge's shape. Defaults to a fully rounded shape
  *   (e.g., `Radius.full` which might correspond to `CircleShape` or a large Dp value).
+ * @param contentDescription Optional accessibility label. Set this for notification counts or the
+ *   content-less dot badge, which otherwise carry no meaning to screen readers.
  * @param content A composable lambda defining the content to be displayed inside the badge. When
  *   null the badge renders as a small dot. Typically this will be a
  *   [androidx.compose.material3.Text] composable.
@@ -56,6 +60,7 @@ fun Badge(
     backgroundColor: Color? = null,
     contentColor: Color? = null,
     roundedSize: Dp = MaterialTheme.radius.full,
+    contentDescription: String? = null,
     content: (@Composable () -> Unit)? = null
 ) {
     val styles = MaterialTheme.styles
@@ -85,6 +90,11 @@ fun Badge(
 
     Box(
         modifier = modifier
+            .then(
+                if (contentDescription != null)
+                    Modifier.semantics { this.contentDescription = contentDescription }
+                else Modifier
+            )
             .defaultMinSize(minWidth = size, minHeight = size)
             .background(containerColor, shape)
             .then(borderStroke?.let { Modifier.border(it, shape) }

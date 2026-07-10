@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +55,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 import kotlin.math.roundToInt
 
 /**
@@ -125,13 +127,14 @@ fun <T> Select(
                 }
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .clip(RoundedCornerShape(radius.md))
-                .clickable(
+                .komoClickable(
+                    onClick = { expanded = !expanded },
+                    enabled = enabled,
+                    role = Role.DropdownList,
+                    shape = RoundedCornerShape(radius.md),
+                    stateDescription = if (expanded) "Expanded" else "Collapsed",
                     interactionSource = interactionSource,
-                    indication = null,
-                    enabled = enabled
-                ) {
-                    expanded = !expanded
-                }
+                )
                 .padding(horizontal = 12.dp),
             contentAlignment = Alignment.CenterStart
         ) {

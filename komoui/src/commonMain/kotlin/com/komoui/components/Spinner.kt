@@ -11,6 +11,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.progressSemantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -58,11 +59,14 @@ fun Spinner(
     color: Color = MaterialTheme.styles.primary,
     strokeWidth: Dp = 3.dp
 ) {
+    // Indeterminate progress semantics so the spinner is perceivable to TalkBack/VoiceOver
+    // instead of being a purely decorative animation.
+    val semanticsModifier = modifier.progressSemantics()
     when (variant) {
-        SpinnerVariant.Circular -> CircularSpinner(modifier, size, color, strokeWidth)
-        SpinnerVariant.Bounce -> BounceSpinner(modifier, size, color)
-        SpinnerVariant.Moon -> MoonSpinner(modifier, size, color, strokeWidth)
-        SpinnerVariant.Pulse -> PulseSpinner(modifier, size, color)
+        SpinnerVariant.Circular -> CircularSpinner(semanticsModifier, size, color, strokeWidth)
+        SpinnerVariant.Bounce -> BounceSpinner(semanticsModifier, size, color)
+        SpinnerVariant.Moon -> MoonSpinner(semanticsModifier, size, color, strokeWidth)
+        SpinnerVariant.Pulse -> PulseSpinner(semanticsModifier, size, color)
     }
 }
 

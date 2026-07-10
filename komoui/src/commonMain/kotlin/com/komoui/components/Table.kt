@@ -3,9 +3,7 @@ package com.komoui.components
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,8 +40,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
 import com.komoui.themes.radius
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 
 /**
  * Root Table primitive. Wraps content in a horizontally scrollable container with a rounded
@@ -139,10 +140,10 @@ fun TableRow(
     val styles = MaterialTheme.styles
     val background = if (selected) styles.muted else styles.card
     val clickModifier = if (onClick != null) {
-        Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick
+        Modifier.komoClickable(
+            onClick = onClick,
+            role = Role.Button,
+            stateDescription = if (selected) "Selected" else null,
         )
     } else Modifier
     Row(
@@ -297,7 +298,7 @@ fun PaginationScope.DefaultPagination() {
             size = ButtonSize.Sm,
             enabled = canPrev
         ) {
-            Text("Previous")
+            Text(MaterialTheme.komoStrings.previous)
         }
         Spacer(modifier = Modifier.width(8.dp))
         Button(
@@ -306,7 +307,7 @@ fun PaginationScope.DefaultPagination() {
             size = ButtonSize.Sm,
             enabled = canNext
         ) {
-            Text("Next")
+            Text(MaterialTheme.komoStrings.next)
         }
     }
 }
@@ -478,7 +479,7 @@ fun <T> DataTable(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "No results.",
+                                    text = MaterialTheme.komoStrings.noResults,
                                     color = styles.mutedForeground,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
@@ -538,13 +539,16 @@ fun <T> DataTable(
         ) {
             if (enableSelection) {
                 Text(
-                    text = "${selectedKeySet.size} of ${sorted.size} row(s) selected.",
+                    text = MaterialTheme.komoStrings.rowsSelected(selectedKeySet.size, sorted.size),
                     color = styles.mutedForeground,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
             Text(
-                text = "Page ${paginationScope.page + 1} of ${paginationScope.pageCount}",
+                text = MaterialTheme.komoStrings.pageIndicator(
+                    paginationScope.page + 1,
+                    paginationScope.pageCount,
+                ),
                 color = styles.mutedForeground,
                 style = MaterialTheme.typography.bodySmall
             )
@@ -564,10 +568,15 @@ private fun SortableHeader(
     val clickable = column.sortable && column.comparator != null
 
     val rowModifier = if (clickable) {
-        Modifier.clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            onClick = onClick
+        Modifier.komoClickable(
+            onClick = onClick,
+            role = Role.Button,
+            stateDescription = when {
+                !isActive -> "Not sorted"
+                sort.direction == SortDirection.ASC -> "Sorted ascending"
+                sort.direction == SortDirection.DESC -> "Sorted descending"
+                else -> "Not sorted"
+            },
         )
     } else Modifier
 

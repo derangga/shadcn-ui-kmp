@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -52,7 +53,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
+import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
+import com.komoui.utils.komoClickable
 import kotlin.math.roundToInt
 
 /**
@@ -141,19 +144,22 @@ fun ComboBox(
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .then(
                     if (enabled) {
-                        Modifier.clickable(
-                            interactionSource = interactionSource,
-                            indication = null
-                        ) {
-                            expanded = !expanded
-                            if (expanded) {
-                                searchText = ""
-                            } else {
-                                if (selectedOption == null && searchText.isNotBlank()) {
+                        Modifier.komoClickable(
+                            onClick = {
+                                expanded = !expanded
+                                if (expanded) {
                                     searchText = ""
+                                } else {
+                                    if (selectedOption == null && searchText.isNotBlank()) {
+                                        searchText = ""
+                                    }
                                 }
-                            }
-                        }
+                            },
+                            role = Role.DropdownList,
+                            shape = RoundedCornerShape(radius.md),
+                            stateDescription = if (expanded) "Expanded" else "Collapsed",
+                            interactionSource = interactionSource,
+                        )
                     } else {
                         Modifier
                     }
@@ -211,7 +217,7 @@ fun ComboBox(
                             value = searchText,
                             onValueChange = { searchText = it },
                             variant = InputVariant.Underlined,
-                            placeholder = "Search options...",
+                            placeholder = MaterialTheme.komoStrings.searchPlaceholder,
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "search") },
                             singleLine = true,
                             focusRequester = searchFocusRequester,
@@ -219,7 +225,7 @@ fun ComboBox(
 
                         if (filteredOptions.isEmpty()) {
                             Text(
-                                text = "No results found.",
+                                text = MaterialTheme.komoStrings.noResultsFound,
                                 color = styles.mutedForeground,
                                 modifier = Modifier
                                     .fillMaxWidth()

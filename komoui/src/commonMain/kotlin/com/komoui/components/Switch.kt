@@ -7,9 +7,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.komoui.themes.styles
+import com.komoui.utils.komoToggleable
 
 /**
  * A Jetpack Compose Switch component for KomoUI.
@@ -76,24 +77,27 @@ fun Switch(
 
     Box(
         modifier = modifier
-            .size(width = switchWidth, height = switchHeight)
-            .border(1.dp, borderColor.copy(alpha = if (enabled) 1f else disabledAlpha), CircleShape)
             // A null callback means the parent owns interaction (e.g. a clickable labeled row):
-            // drop our own click handling and toggleable semantics entirely.
+            // drop our own click handling and toggleable semantics entirely. When interactive,
+            // reserve a 48.dp touch target (visual stays 40x18, drawn below by size + drawBehind).
             .then(
                 if (onCheckedChange != null) {
-                    Modifier.toggleable(
-                        value = checked,
-                        onValueChange = onCheckedChange,
-                        enabled = enabled,
-                        role = Role.Switch,
-                        interactionSource = interactionSource,
-                        indication = null
-                    )
+                    Modifier
+                        .komoToggleable(
+                            value = checked,
+                            onValueChange = onCheckedChange,
+                            enabled = enabled,
+                            role = Role.Switch,
+                            shape = CircleShape,
+                            interactionSource = interactionSource,
+                        )
+                        .minimumInteractiveComponentSize()
                 } else {
                     Modifier
                 }
             )
+            .size(width = switchWidth, height = switchHeight)
+            .border(1.dp, borderColor.copy(alpha = if (enabled) 1f else disabledAlpha), CircleShape)
             .drawBehind {
                 val trackCornerRadius = CornerRadius(switchHeight.toPx() / 2f)
                 val thumbRadius = thumbSize.toPx() / 2f

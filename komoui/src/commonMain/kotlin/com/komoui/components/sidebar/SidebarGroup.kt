@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -97,9 +96,10 @@ fun SidebarGroupAction(
             .padding(horizontal = 4.dp),
         contentAlignment = Alignment.CenterEnd,
     ) {
+        // No hard .size(20.dp): it clamped the button below the 48.dp touch target Button now
+        // reserves. IconSm keeps the compact visual.
         Button(
             onClick = onClick,
-            modifier = Modifier.size(20.dp),
             size = ButtonSize.IconSm,
             variant = ButtonVariant.Ghost,
             content = { content() },
