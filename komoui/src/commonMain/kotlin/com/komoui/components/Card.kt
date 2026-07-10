@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.BoxShadow
 import com.komoui.themes.drawShadows
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -95,11 +96,7 @@ fun CardTitle(
 ) {
     val styles = MaterialTheme.styles
     ProvideTextStyle(
-        value = TextStyle(
-            color = styles.cardForeground,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp
-        )
+        value = MaterialTheme.komoTypography.titleLarge.copy(color = styles.cardForeground)
     ) {
         Column(modifier = modifier) {
             content()
@@ -121,10 +118,7 @@ fun CardDescription(
 ) {
     val styles = MaterialTheme.styles
     ProvideTextStyle(
-        value = TextStyle(
-            color = styles.mutedForeground,
-            fontSize = 14.sp
-        )
+        value = MaterialTheme.komoTypography.body.copy(color = styles.mutedForeground)
     ) {
         Column(modifier = modifier) {
             content()

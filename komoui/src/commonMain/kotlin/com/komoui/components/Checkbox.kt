@@ -23,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import com.komoui.utils.komoToggleable
@@ -35,7 +36,7 @@ import com.komoui.utils.komoToggleable
  * @param modifier The modifier to be applied to the checkbox.
  * @param enabled Controls the enabled state of the checkbox. When `false`, this checkbox will not
  *      be interactable.
- * @param colors [CheckboxColors] that will be used to resolve the colors used for this checkbox in
+ * @param colors [CheckboxStyle] that will be used to resolve the colors used for this checkbox in
  *      different states. See [CheckboxDefaults.colors].
  */
 @Composable
@@ -44,7 +45,7 @@ fun Checkbox(
     onCheckedChange: ((Boolean) -> Unit)?,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: CheckboxColors = CheckboxDefaults.colors()
+    colors: CheckboxStyle = CheckboxDefaults.colors()
 ) {
     val radius = MaterialTheme.radius
 
@@ -135,7 +136,7 @@ private data class ResolvedCheckboxColors(
  * @param checkedBorderColor Border color when checked.
  * @param uncheckedBorderColor Border color when unchecked.
  */
-data class CheckboxColors(
+data class CheckboxStyle(
     val checkedColor: Color,
     val uncheckedColor: Color,
     val disabledColor: Color,
@@ -150,15 +151,8 @@ data class CheckboxColors(
  * Contains the default values used by [Checkbox].
  */
 object CheckboxDefaults {
-    /**
-     * Creates a [CheckboxColors] with the default KomoUI color scheme.
-     *
-     * @return A [CheckboxColors] instance using the current theme's color palette.
-     */
-    @Composable
-    fun colors(): CheckboxColors {
-        val styles = MaterialTheme.styles
-        return CheckboxColors(
+    private fun colorsFrom(styles: KomoStyles): CheckboxStyle {
+        return CheckboxStyle(
             checkedColor = styles.primary,
             uncheckedColor = Color.Transparent,
             disabledColor = styles.muted,
@@ -169,4 +163,13 @@ object CheckboxDefaults {
             uncheckedBorderColor = styles.input
         )
     }
+
+    /** [CheckboxStyle] with the default KomoUI color scheme. */
+    @Composable
+    fun colors(): CheckboxStyle = colorsFrom(MaterialTheme.styles)
+
+    /** [CheckboxStyle] with the default scheme, mutated by [overrides]. */
+    @Composable
+    fun colors(overrides: CheckboxStyle.() -> CheckboxStyle): CheckboxStyle =
+        colorsFrom(MaterialTheme.styles).overrides()
 }

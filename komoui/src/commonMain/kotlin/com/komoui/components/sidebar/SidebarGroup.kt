@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.komoui.components.Button
 import com.komoui.components.ButtonSize
 import com.komoui.components.ButtonVariant
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 /**
@@ -71,8 +72,7 @@ fun SidebarGroupLabel(
     Text(
         text = text,
         modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
+        style = MaterialTheme.komoTypography.labelMedium,
         color = MaterialTheme.styles.sidebarForeground.copy(alpha = 0.7f),
     )
 }

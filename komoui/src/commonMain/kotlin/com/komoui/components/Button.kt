@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.KomoStyles
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -227,10 +228,11 @@ fun Button(
     }
 
     // Common text style for buttons
-    val buttonTextStyle = TextStyle(
-        fontSize = if (size == ButtonSize.Xs) 12.sp else 14.sp,
-        fontWeight = FontWeight.Medium
-    )
+    val buttonTextStyle = if (size == ButtonSize.Xs) {
+        MaterialTheme.komoTypography.labelMedium
+    } else {
+        MaterialTheme.komoTypography.bodyMedium
+    }
 
     // For link variant, add underline
     val linkTextStyle = if (variant == ButtonVariant.Link) {

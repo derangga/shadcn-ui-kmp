@@ -9,17 +9,16 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.RadioButtonColors
-import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.RadioButtonDefaults as M3RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.komoui.themes.KomoStyles
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoSelectable
 
@@ -86,7 +85,7 @@ enum class LayoutOrientation {
  * @param label The text label for this radio button.
  * @param modifier The modifier to be applied to the row containing the radio button and label.
  * @param enabled Controls the enabled state of the radio button and label.
- * @param colors Optional custom colors for the radio button and label.
+ * @param colors The [RadioButtonStyle] for the radio button and label. See [RadioButtonDefaults.colors].
  */
 @Composable
 fun <T> RadioGroupScope<T>.RadioButtonWithLabel(
@@ -94,9 +93,8 @@ fun <T> RadioGroupScope<T>.RadioButtonWithLabel(
     label: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    colors: RadioButtonColors? = null
+    colors: RadioButtonStyle = RadioButtonDefaults.colors()
 ) {
-    val themeColors = MaterialTheme.styles
     val isSelected = (selectedValue == value)
 
     Row(
@@ -116,21 +114,49 @@ fun <T> RadioGroupScope<T>.RadioButtonWithLabel(
             selected = isSelected,
             onClick = null,
             enabled = enabled,
-            colors = colors ?: RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.styles.primary,
-                unselectedColor = MaterialTheme.styles.input,
-                disabledSelectedColor = MaterialTheme.styles.primary.copy(alpha = 0.5f),
-                disabledUnselectedColor = MaterialTheme.styles.mutedForeground.copy(alpha = 0.5f)
+            colors = M3RadioButtonDefaults.colors(
+                selectedColor = colors.selected,
+                unselectedColor = colors.unselected,
+                disabledSelectedColor = colors.disabledSelected,
+                disabledUnselectedColor = colors.disabledUnselected
             ),
             modifier = Modifier.size(24.dp)
         )
         Text(
             text = label,
-            style = TextStyle(
-                color = if (enabled) themeColors.foreground else themeColors.mutedForeground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+            style = MaterialTheme.komoTypography.bodyMedium.copy(
+                color = if (enabled) colors.label else colors.disabledLabel
             )
         )
     }
+}
+
+/** Colors used by a [RadioButtonWithLabel]. */
+data class RadioButtonStyle(
+    val selected: Color,
+    val unselected: Color,
+    val disabledSelected: Color,
+    val disabledUnselected: Color,
+    val label: Color,
+    val disabledLabel: Color,
+)
+
+object RadioButtonDefaults {
+    private fun colorsFrom(styles: KomoStyles): RadioButtonStyle = RadioButtonStyle(
+        selected = styles.primary,
+        unselected = styles.input,
+        disabledSelected = styles.primary.copy(alpha = 0.5f),
+        disabledUnselected = styles.mutedForeground.copy(alpha = 0.5f),
+        label = styles.foreground,
+        disabledLabel = styles.mutedForeground,
+    )
+
+    /** [RadioButtonStyle] with the default KomoUI color scheme. */
+    @Composable
+    fun colors(): RadioButtonStyle = colorsFrom(MaterialTheme.styles)
+
+    /** [RadioButtonStyle] with the default scheme, mutated by [overrides]. */
+    @Composable
+    fun colors(overrides: RadioButtonStyle.() -> RadioButtonStyle): RadioButtonStyle =
+        colorsFrom(MaterialTheme.styles).overrides()
 }

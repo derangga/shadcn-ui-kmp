@@ -52,6 +52,7 @@ import com.komoui.components.Input
 import com.komoui.components.InputVariant
 import com.komoui.themes.drawShadows
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -98,7 +99,7 @@ private fun SidebarShell(
     }
 
     // Reset per-shell flags (rail) so this composition's `SidebarRail()` calls take effect.
-    slots.railEnabled = false
+    slots.railModifier = null
 
     val desktopShell: @Composable () -> Unit = {
         when (state.variant) {
@@ -166,10 +167,8 @@ private fun DesktopStandardSidebar(
             horizontalAlignment = if (state.isCollapsedIcon) Alignment.CenterHorizontally else Alignment.Start,
             content = content,
         )
-        // After `content()` composes, slots.railEnabled reflects whether the user called SidebarRail().
-        if (slots.railEnabled) {
-            RailOverlay(side = state.side)
-        }
+        // After `content()` composes, slots.railModifier reflects whether the user called SidebarRail().
+        slots.railModifier?.let { RailOverlay(side = state.side, modifier = it) }
     }
 }
 
@@ -182,8 +181,10 @@ private fun DesktopFloatingSidebar(
     val slots = LocalSidebarSlots.current!!
     val styles = MaterialTheme.styles
 
-    // Floating-in-icon adds a little for outer padding + border (matches React's calc(width-icon + 1rem + 2px)).
-    val targetWidth = if (state.isCollapsedIcon) state.widthIcon + 18.dp else state.width
+    // Floating-in-icon adds outer padding (1rem = 16.dp) + border (2.dp) to match React's
+    // calc(width-icon + 1rem + 2px).
+    val floatingIconExtraWidth = 16.dp + 2.dp
+    val targetWidth = if (state.isCollapsedIcon) state.widthIcon + floatingIconExtraWidth else state.width
     val animatedWidth by animateDpAsState(
         targetValue = targetWidth,
         animationSpec = state.animationSpec,
@@ -215,21 +216,19 @@ private fun DesktopFloatingSidebar(
             horizontalAlignment = if (state.isCollapsedIcon) Alignment.CenterHorizontally else Alignment.Start,
             content = content,
         )
-        if (slots.railEnabled) {
-            RailOverlay(side = state.side)
-        }
+        slots.railModifier?.let { RailOverlay(side = state.side, modifier = it) }
     }
 }
 
 @Composable
-private fun BoxScope.RailOverlay(side: SidebarSide) {
+private fun BoxScope.RailOverlay(side: SidebarSide, modifier: Modifier = Modifier) {
     val state = LocalSidebarState.current
     val styles = MaterialTheme.styles
 
     // ponytail: 20.dp hit strip, not the full 48.dp — a 48-wide rail would overlap sidebar
     // content along the whole edge. Widen further only if touch misses are reported.
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxHeight()
             .width(20.dp)
             .align(if (side == SidebarSide.Left) Alignment.CenterEnd else Alignment.CenterStart)
@@ -368,13 +367,13 @@ fun SidebarTrigger(
  * the sidebar shell so it can position absolutely on the outer edge.
  */
 @Composable
-fun SidebarRail(@Suppress("UNUSED_PARAMETER") modifier: Modifier = Modifier) {
+fun SidebarRail(modifier: Modifier = Modifier) {
     val slots = LocalSidebarSlots.current
         ?: error("SidebarRail must be used inside Sidebar.")
     val state = LocalSidebarState.current
     if (state.isMobile) return
     if (state.collapsible == SidebarCollapsible.Offcanvas) return
-    slots.railEnabled = true
+    slots.railModifier = modifier
 }
 
 // ---------------------------------------------------------------------------
@@ -433,8 +432,7 @@ fun SidebarHeader(
             if (icon != null) icon()
             Text(
                 text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.komoTypography.title,
                 color = MaterialTheme.styles.sidebarForeground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -497,7 +495,7 @@ fun SidebarFooter(
             if (icon != null) icon()
             Text(
                 text = text,
-                fontSize = 12.sp,
+                style = MaterialTheme.komoTypography.label,
                 color = MaterialTheme.styles.mutedForeground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -542,8 +540,8 @@ fun SidebarInput(
 
 /**
  * Scrollable main content region of the sidebar. Takes the remaining vertical space inside
- * [Sidebar]. Scrolling is disabled when collapsed to icon to avoid scrollbar artifacts on
- * the narrow rail.
+ * [Sidebar]. Scrolls in every mode — including icon-collapsed — so long menus stay reachable
+ * on the narrow rail (matches shadcn).
  *
  * Must be called inside [Sidebar]'s [ColumnScope] so it can claim `weight(1f)`.
  */
@@ -554,7 +552,7 @@ fun ColumnScope.SidebarContent(
 ) {
     val state = LocalSidebarState.current
     val horizontal = if (state.isCollapsedIcon) 4.dp else 8.dp
-    val scrollModifier = if (state.isCollapsedIcon) Modifier else Modifier.verticalScroll(rememberScrollState())
+    val scrollModifier = Modifier.verticalScroll(rememberScrollState())
 
     Column(
         modifier = modifier

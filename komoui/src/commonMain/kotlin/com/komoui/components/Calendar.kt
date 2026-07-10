@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
@@ -52,6 +53,7 @@ import androidx.compose.ui.window.Dialog
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoSelectable
 import kotlinx.datetime.DayOfWeek
@@ -194,7 +196,9 @@ private fun DayOfWeek.toSundayStartIndex(): Int = when (this) {
  * @param modifier The modifier to be applied to the calendar container.
  * @param selectedDate The currently selected date. Null if no date is selected.
  * @param onDateSelected Callback invoked when a date is selected.
- * @param initialMonth The month to display initially. Defaults to current month.
+ * @param initialMonth The month to display initially in uncontrolled mode. Defaults to current month.
+ * @param month Controlled displayed month. Pass non-null (with [onMonthChange]) to drive navigation externally.
+ * @param onMonthChange Called when the displayed month changes (via arrows, pickers, or cross-month day taps).
  * @param dateSelectionMode Defines which dates are clickable (All, PastOrToday, FutureOrToday).
  * @param colors [CalendarStyle] that will be used to resolve the colors used for this calendar in
  */
@@ -204,6 +208,9 @@ fun Calendar(
     selectedDate: LocalDate? = null,
     onDateSelected: (LocalDate) -> Unit,
     initialMonth: YearMonth = YearMonth.now(),
+    month: YearMonth? = null,
+    onMonthChange: ((YearMonth) -> Unit)? = null,
+    enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors()
 ) {
@@ -214,6 +221,9 @@ fun Calendar(
             onDateSelected = onDateSelected
         ),
         initialMonth = initialMonth,
+        month = month,
+        onMonthChange = onMonthChange,
+        enabled = enabled,
         dateSelectionMode = dateSelectionMode,
         colors = colors
     )
@@ -225,7 +235,9 @@ fun Calendar(
  *
  * @param modifier The modifier to be applied to the calendar container.
  * @param selectionMode The selection mode (single or range).
- * @param initialMonth The month to display initially. Defaults to current month.
+ * @param initialMonth The month to display initially in uncontrolled mode. Defaults to current month.
+ * @param month Controlled displayed month. Pass non-null (with [onMonthChange]) to drive navigation externally.
+ * @param onMonthChange Called when the displayed month changes (via arrows, pickers, or cross-month day taps).
  * @param dateSelectionMode Defines which dates are clickable (All, PastOrToday, FutureOrToday).
  * @param colors [CalendarStyle] that will be used to resolve the colors used for this calendar in
  */
@@ -235,14 +247,22 @@ fun Calendar(
     modifier: Modifier = Modifier,
     selectionMode: CalendarSelectionMode,
     initialMonth: YearMonth = YearMonth.now(),
+    month: YearMonth? = null,
+    onMonthChange: ((YearMonth) -> Unit)? = null,
+    enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors()
 ) {
     val themeColors = MaterialTheme.styles
     val radius = MaterialTheme.radius
     val strings = MaterialTheme.komoStrings
-    // Keyed on initialMonth so the view navigates when the caller changes it after first composition.
-    var currentMonth by remember(initialMonth) { mutableStateOf(initialMonth) }
+    // Controlled ([month] non-null) or uncontrolled (seeded by [initialMonth]) month navigation.
+    var internalMonth by remember(initialMonth) { mutableStateOf(initialMonth) }
+    val currentMonth = month ?: internalMonth
+    val setMonth: (YearMonth) -> Unit = { next ->
+        if (month == null) internalMonth = next
+        onMonthChange?.invoke(next)
+    }
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     }
@@ -283,16 +303,13 @@ fun Calendar(
         ).map { strings.weekdayNamesShort[it.ordinal] }
     }
 
-    // Pre-compute text styles used in the day grid
-    val dayTextStyleNormal = remember {
-        TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal)
-    }
-    val dayTextStyleBold = remember {
-        TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-    }
+    // Text styles used in the day grid
+    val dayTextStyleNormal = MaterialTheme.komoTypography.body
+    val dayTextStyleBold = MaterialTheme.komoTypography.body.copy(fontWeight = FontWeight.SemiBold)
 
     Box(
         modifier = modifier
+            .alpha(if (enabled) 1f else 0.5f)
             .widthIn(max = 300.dp)
     ) {
         Column(
@@ -306,7 +323,7 @@ fun Calendar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { currentMonth = currentMonth.minusMonths(1) }) {
+                IconButton(onClick = { setMonth(currentMonth.minusMonths(1)) }, enabled = enabled) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
                         contentDescription = "Previous Month",
@@ -323,16 +340,13 @@ fun Calendar(
                         modifier = Modifier
                             .clip(RoundedCornerShape(radius.md))
                             .border(1.dp, colors.monthSelectorBorder, RoundedCornerShape(radius.md))
-                            .clickable { showMonthPicker = true }
+                            .clickable(enabled = enabled) { showMonthPicker = true }
                             .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = strings.monthNamesShort[currentMonth.month.ordinal],
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
+                                style = MaterialTheme.komoTypography.titleMedium,
                                 color = colors.monthText
                             )
                             Icon(
@@ -349,16 +363,13 @@ fun Calendar(
                         modifier = Modifier
                             .clip(RoundedCornerShape(radius.md))
                             .border(1.dp, colors.yearSelectorBorder, RoundedCornerShape(radius.md))
-                            .clickable { showYearPicker = true }
+                            .clickable(enabled = enabled) { showYearPicker = true }
                             .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = currentMonth.year.toString(),
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
+                                style = MaterialTheme.komoTypography.titleMedium,
                                 color = colors.yearText
                             )
                             Icon(
@@ -371,7 +382,7 @@ fun Calendar(
                     }
                 }
 
-                IconButton(onClick = { currentMonth = currentMonth.plusMonths(1) }) {
+                IconButton(onClick = { setMonth(currentMonth.plusMonths(1)) }, enabled = enabled) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
                         contentDescription = "Next Month",
@@ -389,10 +400,8 @@ fun Calendar(
                         text = weekday,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            color = colors.weekDaysText,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                        style = MaterialTheme.komoTypography.labelMedium.copy(
+                            color = colors.weekDaysText
                         )
                     )
                 }
@@ -463,7 +472,7 @@ fun Calendar(
                             val isToday = date == today
 
                             // Logic for date clickability based on dateSelectionMode
-                            val isClickable = when (dateSelectionMode) {
+                            val isClickable = enabled && when (dateSelectionMode) {
                                 DateSelectionMode.All -> true
                                 DateSelectionMode.PastOrToday -> date <= today
                                 DateSelectionMode.FutureOrToday -> date >= today
@@ -592,7 +601,7 @@ fun Calendar(
                                         }
                                         // Navigate to the selected date's month if it's not current month
                                         if (!isCurrentMonth) {
-                                            currentMonth = YearMonth.from(date)
+                                            setMonth(YearMonth.from(date))
                                         }
                                         },
                                     )
@@ -616,8 +625,8 @@ fun Calendar(
     if (showMonthPicker) {
         MonthPickerDialog(
             currentMonth = currentMonth.month,
-            onMonthSelected = { month ->
-                currentMonth = currentMonth.withMonth(month.ordinal + 1)
+            onMonthSelected = { selected ->
+                setMonth(currentMonth.withMonth(selected.ordinal + 1))
                 showMonthPicker = false
             },
             onDismissRequest = { showMonthPicker = false },
@@ -630,7 +639,7 @@ fun Calendar(
         YearPickerDialog(
             currentYear = currentMonth.year,
             onYearSelected = { year ->
-                currentMonth = currentMonth.withYear(year)
+                setMonth(currentMonth.withYear(year))
                 showYearPicker = false
             },
             onDismissRequest = { showYearPicker = false },
@@ -696,10 +705,8 @@ private fun MonthPickerDialog(
                     ) {
                         Text(
                             text = MaterialTheme.komoStrings.monthNamesFull[month.ordinal],
-                            style = TextStyle(
-                                color = textColor,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                            style = MaterialTheme.komoTypography.titleMedium.copy(
+                                color = textColor
                             )
                         )
                     }
@@ -771,10 +778,8 @@ private fun YearPickerDialog(
                     ) {
                         Text(
                             text = year.toString(),
-                            style = TextStyle(
-                                color = textColor,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                            style = MaterialTheme.komoTypography.titleMedium.copy(
+                                color = textColor
                             )
                         )
                     }
@@ -785,7 +790,6 @@ private fun YearPickerDialog(
 }
 
 data class CalendarStyle(
-    val background: Color,
     val border: Color,
     val leftIconTint: Color,
     val rightIconTint: Color,
@@ -830,7 +834,6 @@ object CalendarDefaults {
     @Composable
     private fun colorsFrom(colors: KomoStyles): CalendarStyle {
         return CalendarStyle(
-            background = colors.background,
             border = colors.border,
             leftIconTint = colors.foreground,
             rightIconTint = colors.foreground,

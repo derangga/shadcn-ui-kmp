@@ -35,6 +35,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 
@@ -130,10 +131,8 @@ fun Accordion(
                 ) {
                     // Header content
                     ProvideTextStyle(
-                        value = TextStyle(
-                            color = styles.foreground,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                        value = MaterialTheme.komoTypography.titleMedium.copy(
+                            color = styles.foreground
                         )
                     ) {
                         item.header()
@@ -163,9 +162,8 @@ fun Accordion(
                             .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                     ) {
                         ProvideTextStyle(
-                            value = TextStyle(
-                                color = styles.foreground,
-                                fontSize = 14.sp
+                            value = MaterialTheme.komoTypography.body.copy(
+                                color = styles.foreground
                             )
                         ) {
                             item.content()

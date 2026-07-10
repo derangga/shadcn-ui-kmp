@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 enum class EmptyMediaVariant {
@@ -132,10 +133,9 @@ fun EmptyTitle(
 ) {
     val styles = MaterialTheme.styles
     ProvideTextStyle(
-        value = TextStyle(
+        value = MaterialTheme.komoTypography.titleLarge.copy(
             color = styles.foreground,
             fontWeight = FontWeight.Medium,
-            fontSize = 18.sp,
             letterSpacing = (-0.2).sp
         )
     ) {
@@ -158,9 +158,8 @@ fun EmptyDescription(
 ) {
     val styles = MaterialTheme.styles
     ProvideTextStyle(
-        value = TextStyle(
+        value = MaterialTheme.komoTypography.body.copy(
             color = styles.mutedForeground,
-            fontSize = 14.sp,
             lineHeight = 22.sp
         )
     ) {

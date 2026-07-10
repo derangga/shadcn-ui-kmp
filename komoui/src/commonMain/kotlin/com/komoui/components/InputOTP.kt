@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 data class InputOTPBorderStyle(
@@ -229,10 +230,8 @@ private fun InputOTPSlot(
         if (char != null) {
             Text(
                 text = char.toString(),
-                style = TextStyle(
-                    color = if (enabled) colors.text else colors.disableText,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                style = MaterialTheme.komoTypography.bodyMedium.copy(
+                    color = if (enabled) colors.text else colors.disableText
                 )
             )
         } else if (isActive) {

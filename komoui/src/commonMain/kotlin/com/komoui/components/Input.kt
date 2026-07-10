@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
+import com.komoui.themes.KomoFieldDefaults
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 enum class InputVariant {
@@ -147,18 +149,14 @@ fun Input(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 44.dp)
+                .defaultMinSize(minHeight = KomoFieldDefaults.Height)
                 // Expose the error state to screen readers (visual-only border color otherwise).
                 .then(if (isError) Modifier.semantics { error("Invalid input") } else Modifier)
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                 .then(borderStyle),
             enabled = enabled,
             readOnly = readOnly,
-            textStyle = TextStyle(
-                color = textColor,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal
-            ),
+            textStyle = MaterialTheme.komoTypography.body.copy(color = textColor),
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
@@ -189,10 +187,8 @@ fun Input(
                         if (value.isEmpty()) {
                             Text(
                                 text = placeholder,
-                                style = TextStyle(
-                                    color = placeholderColor,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal
+                                style = MaterialTheme.komoTypography.body.copy(
+                                    color = placeholderColor
                                 )
                             )
                         }
@@ -214,9 +210,8 @@ fun Input(
         supportingText?.let {
             Spacer(modifier = Modifier.height(2.dp))
             ProvideTextStyle(
-                value = TextStyle(
-                    color = colors.supportingText,
-                    fontSize = 12.sp
+                value = MaterialTheme.komoTypography.label.copy(
+                    color = colors.supportingText
                 )
             ) {
                 it()

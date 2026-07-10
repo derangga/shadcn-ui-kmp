@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -108,12 +109,7 @@ fun Badge(
     ) {
         if (content != null) {
             ProvideTextStyle(
-                value = TextStyle(
-                    color = resolvedContentColor,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 16.sp
-                )
+                value = MaterialTheme.komoTypography.labelMedium.copy(color = resolvedContentColor)
             ) {
                 content()
             }

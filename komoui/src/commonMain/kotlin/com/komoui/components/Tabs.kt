@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoSelectable
 
@@ -137,8 +138,8 @@ fun TabsTrigger(
         Text(
             text = text,
             color = textColor,
-            fontSize = 14.sp,
-            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+            style = if (isSelected) MaterialTheme.komoTypography.bodyMedium
+            else MaterialTheme.komoTypography.body
         )
     }
 }

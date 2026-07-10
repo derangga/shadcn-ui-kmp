@@ -13,6 +13,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 internal val LocalKomoStyles = staticCompositionLocalOf<KomoStyles> { LightStyles }
 internal val LocalKomoRadius = staticCompositionLocalOf<KomoRadius> { Radius }
+internal val LocalKomoTypography = staticCompositionLocalOf { KomoTypography() }
 internal val LocalKomoDarkMode = staticCompositionLocalOf { false }
 
 
@@ -30,6 +31,7 @@ internal val LocalKomoDarkMode = staticCompositionLocalOf { false }
  * @param materialLightColors The Material 3 [ColorScheme] to be used for the light theme. Defaults to [lightColorScheme].
  * @param materialDarkColors The Material 3 [ColorScheme] to be used for the dark theme. Defaults to [darkColorScheme].
  * @param komoRadius The [KomoRadius] to be used. Defaults to [Radius].
+ * @param komoTypography The [KomoTypography] text tokens to be used. Defaults to [KomoTypography].
  * @param strings The [KomoStrings] (localizable labels/descriptions) to be used. Defaults to English.
  * @param typography The Material 3 [Typography] to be used. Defaults to [DefaultTypography].
  * @param content The composable content to be themed.
@@ -42,6 +44,7 @@ fun KomoTheme(
     materialLightColors: ColorScheme = lightColorScheme(),
     materialDarkColors: ColorScheme = darkColorScheme(),
     komoRadius: KomoRadius = Radius,
+    komoTypography: KomoTypography = KomoTypography(),
     strings: KomoStrings = KomoStrings(),
     typography: Typography? = null,
     content: @Composable () -> Unit,
@@ -51,6 +54,7 @@ fun KomoTheme(
     CompositionLocalProvider(
         LocalKomoStyles provides colors,
         LocalKomoRadius provides komoRadius,
+        LocalKomoTypography provides komoTypography,
         LocalKomoStrings provides strings,
         LocalKomoDarkMode provides isDarkTheme
     ) {
@@ -71,6 +75,11 @@ val MaterialTheme.radius: KomoRadius
     @Composable
     @ReadOnlyComposable
     get() = LocalKomoRadius.current
+
+val MaterialTheme.komoTypography: KomoTypography
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalKomoTypography.current
 
 val MaterialTheme.isDark: Boolean
     @Composable

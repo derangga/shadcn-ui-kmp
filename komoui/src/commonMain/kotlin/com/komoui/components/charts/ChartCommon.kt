@@ -1,25 +1,43 @@
 package com.komoui.components.charts
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -28,7 +46,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellation
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
@@ -42,7 +61,6 @@ import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.max
@@ -50,61 +68,34 @@ import kotlin.math.min
 import kotlin.math.pow
 
 /**
- * A single bar-chart series.
+ * A single (x-category, y-value) data point shared by all chart types.
+ */
+@Immutable
+data class ChartPoint(val x: String, val y: Float)
+
+/**
+ * A single chart series shared by [BarChart], [LineChart] and [AreaChart].
  *
  * @param key Stable identifier; used for animation keying and tooltip lookup.
  * @param label Human-readable label shown in legend / tooltip.
- * @param color Bar color.
+ * @param color Series color (bar fill / line stroke / area stroke + fill base).
  * @param points Ordered list of (x-category, y-value) points.
  */
 @Immutable
-data class BarSeries(
+data class ChartSeries(
     val key: String,
     val label: String,
     val color: Color,
-    val points: List<BarPoint>,
+    val points: List<ChartPoint>,
 )
 
-@Immutable
-data class BarPoint(val x: String, val y: Float)
-
-/**
- * A single line-chart series.
- *
- * @param key Stable identifier.
- * @param label Human-readable label for legend / tooltip.
- * @param color Stroke color.
- * @param points Ordered list of (x-category, y-value) points.
- */
-@Immutable
-data class LineSeries(
-    val key: String,
-    val label: String,
-    val color: Color,
-    val points: List<LinePoint>,
-)
-
-@Immutable
-data class LinePoint(val x: String, val y: Float)
-
-/**
- * A single area-chart series.
- *
- * @param key Stable identifier.
- * @param label Human-readable label for legend / tooltip.
- * @param color Stroke + fill base color.
- * @param points Ordered list of (x-category, y-value) points.
- */
-@Immutable
-data class AreaSeries(
-    val key: String,
-    val label: String,
-    val color: Color,
-    val points: List<AreaPoint>,
-)
-
-@Immutable
-data class AreaPoint(val x: String, val y: Float)
+// Chart-type-specific aliases kept for source compatibility; all charts share one model.
+typealias BarPoint = ChartPoint
+typealias BarSeries = ChartSeries
+typealias LinePoint = ChartPoint
+typealias LineSeries = ChartSeries
+typealias AreaPoint = ChartPoint
+typealias AreaSeries = ChartSeries
 
 /**
  * Configuration for chart axes and gridlines.
@@ -202,53 +193,46 @@ internal fun computePlotRect(canvasSize: Size, insets: PlotInsets): Rect =
     )
 
 /**
- * Active scrub state for tap-and-drag tooltips. `index = null` means not scrubbing.
+ * Active scrub state for drag tooltips. `index = null` means not scrubbing.
  */
 @Stable
 internal class ChartScrubState {
     var index: Int? by mutableStateOf(null)
-    var pointer: Offset? by mutableStateOf(null)
 }
 
 @Composable
 internal fun rememberChartScrubState(): ChartScrubState = remember { ChartScrubState() }
 
 /**
- * Modifier that attaches tap-and-drag horizontal scrubbing. On press-down the
- * nearest column is selected; the selection follows the finger; release clears.
+ * Modifier that attaches horizontal drag scrubbing: the nearest column is selected once the drag
+ * crosses the horizontal touch slop, the selection follows the finger, and release clears it.
  *
- * This is **claim-on-down**: the first pointer-down is consumed immediately so
- * the tooltip appears under the finger without a touch-slop delay. As a
- * consequence it is **incompatible with `Modifier.horizontalScroll`**, which
- * uses a claim-after-touch-slop strategy — once this modifier consumes the
- * down event the scrollable parent never gets a chance to start scrolling.
- * Chart composables resolve this by disabling tooltips when `scrollable = true`.
- * See `Chart.md` in this directory (Pitfall #4) for alternatives if you need both.
+ * The gesture is claimed only after a **horizontal** drag is detected, so a vertical-scrolling
+ * parent (a chart embedded in a scrollable page — the common case) still receives vertical drags.
+ * It remains incompatible with `Modifier.horizontalScroll` (both want the horizontal slop), which
+ * is why chart composables disable tooltips in `scrollable` mode.
  */
 internal fun Modifier.chartScrub(
     columnCount: Int,
     plotLeft: Float,
     plotWidth: Float,
-    onChange: (Int?, Offset?) -> Unit,
+    onChange: (Int?) -> Unit,
 ): Modifier = this.pointerInput(columnCount, plotLeft, plotWidth) {
     if (columnCount <= 0 || plotWidth <= 0f) return@pointerInput
     awaitPointerEventScope {
         while (true) {
-            val down = awaitPointerEvent()
-            val firstDown = down.changes.firstOrNull { it.pressed && !it.previousPressed } ?: continue
-            firstDown.consume()
-            emitScrub(firstDown.position, columnCount, plotLeft, plotWidth, onChange)
-            var pointerId = firstDown.id
+            val down = awaitFirstDown(requireUnconsumed = false)
+            val dragStart = awaitHorizontalTouchSlopOrCancellation(down.id) { change, _ ->
+                emitScrub(change.position, columnCount, plotLeft, plotWidth, onChange)
+                change.consume()
+            } ?: continue // cancelled or a vertical drag the parent should handle
+            emitScrub(dragStart.position, columnCount, plotLeft, plotWidth, onChange)
             while (true) {
                 val event = awaitPointerEvent()
-                val change = event.changes.firstOrNull { it.id == pointerId }
-                if (change == null) {
-                    onChange(null, null)
-                    break
-                }
-                if (change.changedToUp()) {
-                    onChange(null, null)
-                    change.consume()
+                val change = event.changes.firstOrNull { it.id == down.id }
+                if (change == null || change.changedToUp()) {
+                    onChange(null)
+                    change?.consume()
                     break
                 }
                 if (change.positionChanged()) {
@@ -265,11 +249,11 @@ private fun emitScrub(
     columnCount: Int,
     plotLeft: Float,
     plotWidth: Float,
-    onChange: (Int?, Offset?) -> Unit,
+    onChange: (Int?) -> Unit,
 ) {
     val rel = ((pos.x - plotLeft) / plotWidth).coerceIn(0f, 1f)
     val idx = (rel * columnCount).toInt().coerceIn(0, columnCount - 1)
-    onChange(idx, pos)
+    onChange(idx)
 }
 
 /**
@@ -292,7 +276,9 @@ internal fun DrawScope.drawAxesAndGrid(
     val span = domain.endInclusive - domain.start
     if (span <= 0f) return
 
-    val dashEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f))
+    val strokePx = 1.dp.toPx()
+    val gap4 = 4.dp.toPx()
+    val dashEffect = PathEffect.dashPathEffect(floatArrayOf(gap4, gap4))
 
     if (axisOptions.showHorizontalGrid) {
         yTicks.forEach { tick ->
@@ -301,7 +287,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 color = gridColor,
                 start = Offset(plotRect.left, y),
                 end = Offset(plotRect.right, y),
-                strokeWidth = 1f,
+                strokeWidth = strokePx,
                 pathEffect = if (tick == domain.start) null else dashEffect,
             )
         }
@@ -315,7 +301,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 color = gridColor,
                 start = Offset(x, plotRect.top),
                 end = Offset(x, plotRect.bottom),
-                strokeWidth = 1f,
+                strokeWidth = strokePx,
                 pathEffect = dashEffect,
             )
         }
@@ -330,7 +316,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 textLayoutResult = measured,
                 color = labelColor,
                 topLeft = Offset(
-                    x = plotRect.left - measured.size.width - 4f,
+                    x = plotRect.left - measured.size.width - 4.dp.toPx(),
                     y = y - measured.size.height / 2f,
                 ),
             )
@@ -348,7 +334,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 color = labelColor,
                 topLeft = Offset(
                     x = centerX - measured.size.width / 2f,
-                    y = plotRect.bottom + 6f,
+                    y = plotRect.bottom + 6.dp.toPx(),
                 ),
             )
         }
@@ -383,7 +369,7 @@ internal fun DrawScope.drawYAxisOnly(
             textLayoutResult = measured,
             color = labelColor,
             topLeft = Offset(
-                x = yAxisRect.right - measured.size.width - 4f,
+                x = yAxisRect.right - measured.size.width - 4.dp.toPx(),
                 y = y - measured.size.height / 2f,
             ),
         )
@@ -402,12 +388,13 @@ internal fun DrawScope.drawScrubIndicator(
     if (columnCount <= 0) return
     val slot = plotRect.width / columnCount
     val x = plotRect.left + slot * (activeIndex + 0.5f)
+    val dash = 3.dp.toPx()
     drawLine(
         color = color,
         start = Offset(x, plotRect.top),
         end = Offset(x, plotRect.bottom),
-        strokeWidth = 1f,
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(3f, 3f)),
+        strokeWidth = 1.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash)),
     )
 }
 
@@ -426,6 +413,204 @@ internal fun chartSemanticsLabel(seriesLabels: List<String>, pointCount: Int): S
         append(pointCount)
         append(" data points each")
     }
+
+/**
+ * Per-frame plot geometry handed to a chart's draw lambda by [ChartScaffold].
+ *
+ * @property progress Animation progress in `0f..1f` (reveal / grow-in).
+ * @property scrubIndex Active scrub column, or null when not scrubbing.
+ */
+@Immutable
+internal class ChartPlotScope(
+    val plotRect: Rect,
+    val domain: ClosedFloatingPointRange<Float>,
+    val span: Float,
+    val columnCount: Int,
+    val slotWidth: Float,
+    val progress: Float,
+    val scrubIndex: Int?,
+)
+
+/**
+ * Shared chart scaffold behind [BarChart], [LineChart] and [AreaChart]. Owns the pinned y-axis,
+ * horizontal-scroll wiring, drag-scrub gesture, axes/grid, scrub indicator, tooltip and legend;
+ * the caller supplies only [drawPlot], which draws the bars / line / area for one frame.
+ *
+ * Domain and tick computation is remembered on the data (not on the whole [axisOptions], whose
+ * formatter lambdas defeat data-class equality), so scrubbing doesn't recompute them every frame.
+ */
+@Composable
+internal fun ChartScaffold(
+    series: List<ChartSeries>,
+    modifier: Modifier,
+    axisOptions: ChartAxisOptions,
+    showTooltip: Boolean,
+    showLegend: Boolean,
+    chartHeight: Dp,
+    scrollable: Boolean,
+    minColumnWidth: Dp,
+    animate: Boolean,
+    animationDurationMillis: Int,
+    drawPlot: DrawScope.(ChartPlotScope) -> Unit,
+) {
+    val textMeasurer = rememberTextMeasurer()
+    val labelStyle = chartLabelStyle()
+    val gridColor = MaterialTheme.styles.border
+    val labelColor = MaterialTheme.styles.mutedForeground
+    val indicatorColor = MaterialTheme.styles.mutedForeground
+
+    val xLabels = remember(series) { series.firstOrNull()?.points?.map { it.x } ?: emptyList() }
+    val columnCount = xLabels.size
+
+    val domain = remember(series, axisOptions.yDomain) {
+        val allValues = series.flatMap { s -> s.points.map { it.y } }
+        computeDomain(allValues.minOrNull() ?: 0f, allValues.maxOrNull() ?: 1f, axisOptions.yDomain)
+    }
+    val ticks = remember(domain, axisOptions.yTickCount) { yTicks(domain, axisOptions.yTickCount) }
+
+    val density = LocalDensity.current
+    val insets = AxisInsetsDp()
+    val yAxisWidthDp = if (axisOptions.showY) insets.left else 0.dp
+    val bottomInsetPx = with(density) { (if (axisOptions.showX) insets.bottom else 0.dp).toPx() }
+
+    val progress = remember { Animatable(if (animate) 0f else 1f) }
+    LaunchedEffect(series, animate) {
+        if (animate) {
+            progress.snapTo(0f)
+            progress.animateTo(1f, tween(durationMillis = animationDurationMillis))
+        } else {
+            progress.snapTo(1f)
+        }
+    }
+
+    val scrub = rememberChartScrubState()
+    var canvasSize by remember { mutableStateOf(IntSize.Zero) }
+    val effectiveShowTooltip = showTooltip && !scrollable
+    val plotAxisOptions = remember(axisOptions) { axisOptions.copy(showY = false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription =
+                    chartSemanticsLabel(series.map { it.label }, series.firstOrNull()?.points?.size ?: 0)
+            }
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().height(chartHeight)) {
+            if (axisOptions.showY) {
+                Canvas(modifier = Modifier.width(yAxisWidthDp).fillMaxHeight()) {
+                    val yAxisRect = computePlotRect(size, PlotInsets(0f, bottomInsetPx))
+                    drawYAxisOnly(
+                        yAxisRect = yAxisRect,
+                        yTicks = ticks,
+                        domain = domain,
+                        yLabelFormatter = axisOptions.yLabelFormatter,
+                        textMeasurer = textMeasurer,
+                        labelStyle = labelStyle,
+                        labelColor = labelColor,
+                    )
+                }
+            }
+
+            BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                val viewportDp = maxWidth
+                val rawContentDp = if (columnCount > 0) minColumnWidth * columnCount else viewportDp
+                val contentWidthDp = if (scrollable) maxOf(rawContentDp, viewportDp) else viewportDp
+                val needsScroll = scrollable && contentWidthDp > viewportDp
+
+                val scrollMod = if (needsScroll) {
+                    Modifier.horizontalScroll(rememberScrollState())
+                } else Modifier
+
+                Box(modifier = Modifier.fillMaxSize().then(scrollMod)) {
+                    val gestureMod = if (effectiveShowTooltip && columnCount > 0) {
+                        Modifier.chartScrub(
+                            columnCount = columnCount,
+                            plotLeft = 0f,
+                            plotWidth = canvasSize.width.toFloat(),
+                        ) { idx -> scrub.index = idx }
+                    } else Modifier
+
+                    Canvas(
+                        modifier = Modifier
+                            .width(contentWidthDp)
+                            .fillMaxHeight()
+                            .onSizeChanged { canvasSize = it }
+                            .then(gestureMod),
+                    ) {
+                        val plotRect = computePlotRect(size, PlotInsets(0f, bottomInsetPx))
+
+                        drawAxesAndGrid(
+                            plotRect = plotRect,
+                            xLabels = xLabels,
+                            yTicks = ticks,
+                            domain = domain,
+                            axisOptions = plotAxisOptions,
+                            textMeasurer = textMeasurer,
+                            labelStyle = labelStyle,
+                            gridColor = gridColor,
+                            labelColor = labelColor,
+                        )
+
+                        if (columnCount == 0 || series.isEmpty()) return@Canvas
+                        val span = domain.endInclusive - domain.start
+                        if (span <= 0f) return@Canvas
+                        val slotWidth = plotRect.width / columnCount
+
+                        drawPlot(
+                            ChartPlotScope(
+                                plotRect = plotRect,
+                                domain = domain,
+                                span = span,
+                                columnCount = columnCount,
+                                slotWidth = slotWidth,
+                                progress = progress.value,
+                                scrubIndex = scrub.index,
+                            )
+                        )
+
+                        scrub.index?.let { idx ->
+                            drawScrubIndicator(plotRect, columnCount, idx, indicatorColor)
+                        }
+                    }
+
+                    val activeIdx = scrub.index
+                    if (effectiveShowTooltip && activeIdx != null && activeIdx in 0 until columnCount) {
+                        val slotWidthPx = canvasSize.width.toFloat() / columnCount
+                        val centerX = slotWidthPx * (activeIdx + 0.5f)
+                        val title = xLabels.getOrNull(activeIdx).orEmpty()
+                        val entries = series.mapNotNull { s ->
+                            val p = s.points.getOrNull(activeIdx) ?: return@mapNotNull null
+                            TooltipEntry(s.label, axisOptions.yLabelFormatter(p.y), s.color)
+                        }
+                        // Flip the tooltip to the left of the scrub line for right-half columns so
+                        // it doesn't clip off the right edge.
+                        if (centerX > canvasSize.width / 2f) {
+                            val endDp = with(density) { (canvasSize.width - centerX).toDp() }
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                                contentAlignment = Alignment.TopEnd,
+                            ) {
+                                Box(modifier = Modifier.padding(end = endDp + 8.dp)) {
+                                    ChartTooltip(title = title, entries = entries)
+                                }
+                            }
+                        } else {
+                            val xDp = with(density) { centerX.toDp() }
+                            Box(modifier = Modifier.padding(start = xDp + 8.dp, top = 8.dp)) {
+                                ChartTooltip(title = title, entries = entries)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showLegend) {
+            ChartLegend(items = series.map { it.label to it.color })
+        }
+    }
+}
 
 /**
  * Small flow-row of color-dot + label chips, rendered below the chart when enabled.

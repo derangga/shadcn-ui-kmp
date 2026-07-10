@@ -61,8 +61,9 @@ enum class CarouselOrientation {
  */
 @Composable
 fun Carousel(
-    containerModifier: Modifier = Modifier,
+    itemCount: Int,
     modifier: Modifier = Modifier,
+    containerModifier: Modifier = Modifier,
     state: PagerState? = null,
     autoScroll: Boolean = false,
     autoScrollDelayMillis: Long = 3000,
@@ -72,7 +73,6 @@ fun Carousel(
     showIndicator: Boolean = false,
     indicatorStyle: IndicatorStyle = CarouselDefaults.carouselIndicator(),
     itemSpacing: Dp = 8.dp,
-    itemCount: Int,
     pageSize: PageSize = PageSize.Fill,
     onItemChanged: ((Int) -> Unit)? = null,
     content: @Composable PagerScope.(position: Int) -> Unit

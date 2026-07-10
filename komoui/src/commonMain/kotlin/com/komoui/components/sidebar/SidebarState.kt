@@ -8,6 +8,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -106,7 +107,6 @@ class SidebarState internal constructor(
         if (isMobile) onOpenMobileChange(true) else onOpenChange(true)
     }
 
-    internal fun setOpen(open: Boolean) = onOpenChange(open)
     internal fun setOpenMobile(open: Boolean) = onOpenMobileChange(open)
 }
 
@@ -131,8 +131,8 @@ internal class SidebarSlots {
     // a stale captured lambda.
     var sidebar: (@Composable () -> Unit)? by mutableStateOf(null)
     var inset: (@Composable () -> Unit)? by mutableStateOf(null)
-    /** Set by [SidebarRail] to opt the sidebar shell into rendering an outer-edge rail. */
-    var railEnabled: Boolean by mutableStateOf(false)
+    /** Modifier registered by [SidebarRail]; non-null opts the shell into rendering an outer-edge rail. */
+    var railModifier: Modifier? by mutableStateOf(null)
 }
 
 internal val LocalSidebarSlots = compositionLocalOf<SidebarSlots?> { null }

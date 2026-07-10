@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 // --- 3. Dropdown Menu Components ---
@@ -115,11 +116,7 @@ fun DropdownMenuItem(
     ComposeDropdownMenuItem(
         text = {
             ProvideTextStyle(
-                value = TextStyle(
-                    color = contentColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal
-                )
+                value = MaterialTheme.komoTypography.body.copy(color = contentColor)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.Start,

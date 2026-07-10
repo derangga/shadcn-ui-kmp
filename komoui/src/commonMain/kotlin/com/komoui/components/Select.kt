@@ -45,18 +45,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
+import com.komoui.themes.FieldColors
+import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.styles
+import com.komoui.themes.komoTypography
 import com.komoui.utils.komoClickable
-import kotlin.math.roundToInt
+import com.komoui.utils.rememberAnchoredPopupPositionProvider
 
 /**
  * A Jetpack Compose Select component for KomoUI.
@@ -81,26 +82,30 @@ fun <T> Select(
     label: (T) -> String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    placeholder: String = "Select option..."
+    placeholder: String = "Select option...",
+    isError: Boolean = false,
+    supportingText: String? = null,
+    colors: FieldColors = KomoFieldDefaults.colors()
 ) {
     val styles = MaterialTheme.styles
     val radius = MaterialTheme.radius
     var expanded by remember { mutableStateOf(false) }
 
-    // State to hold the position and width of the input field
+    // Width of the trigger, so the popup can match it. Position/flipping is handled by the provider.
     var inputWidthPx by remember { mutableIntStateOf(0) }
-    var inputHeightPx by remember { mutableIntStateOf(0) }
-    var inputXPositionPx by remember { mutableIntStateOf(0) }
-    var inputYPositionPx by remember { mutableIntStateOf(0) }
-
     val density = LocalDensity.current
+    val positionProvider = rememberAnchoredPopupPositionProvider()
 
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val currentBorderColor by animateColorAsState(
-        targetValue = if (enabled && (isFocused || isPressed || expanded)) styles.ring else styles.border,
+        targetValue = when {
+            isError -> colors.errorBorder
+            enabled && (isFocused || isPressed || expanded) -> colors.focusedBorder
+            else -> colors.border
+        },
         animationSpec = tween(150), label = "selectBorderColor"
     )
 
@@ -116,14 +121,9 @@ fun <T> Select(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(KomoFieldDefaults.Height)
                 .onGloballyPositioned { coordinates ->
-                    // Get the size and position of the input field
                     inputWidthPx = coordinates.size.width
-                    inputHeightPx = coordinates.size.height
-                    val position = coordinates.parentLayoutCoordinates?.windowToLocal(coordinates.positionInWindow())
-                    inputXPositionPx = position?.x?.roundToInt() ?: 0
-                    inputYPositionPx = position?.y?.roundToInt() ?: 0
                 }
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .clip(RoundedCornerShape(radius.md))
@@ -146,8 +146,8 @@ fun <T> Select(
                 // Display selected option or placeholder
                 Text(
                     text = displayText ?: placeholder,
-                    color = if (displayText != null) styles.foreground else styles.mutedForeground,
-                    fontSize = 14.sp,
+                    color = if (displayText != null) colors.text else colors.placeholder,
+                    style = MaterialTheme.komoTypography.body,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
@@ -161,11 +161,19 @@ fun <T> Select(
             }
         }
 
+        if (supportingText != null) {
+            Text(
+                text = supportingText,
+                color = if (isError) colors.errorSupportingText else colors.supportingText,
+                style = MaterialTheme.komoTypography.label,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
         // Dropdown Popup
         if (expanded) {
             Popup(
-                // Position the popup relative to the input field
-                offset = IntOffset(inputXPositionPx, inputYPositionPx + inputHeightPx),
+                popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true), // Make popup focusable to handle outside clicks
                 onDismissRequest = { expanded = false }
             ) {
@@ -214,7 +222,7 @@ fun <T> Select(
                                         Text(
                                             text = label(option),
                                             color = optionTextColor,
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.komoTypography.body,
                                             modifier = Modifier.weight(1f)
                                         )
                                         if (isSelected) {
@@ -256,7 +264,10 @@ fun Select(
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    placeholder: String = "Select option..."
+    placeholder: String = "Select option...",
+    isError: Boolean = false,
+    supportingText: String? = null,
+    colors: FieldColors = KomoFieldDefaults.colors()
 ) {
     Select(
         options = options,
@@ -265,6 +276,9 @@ fun Select(
         label = { it },
         modifier = modifier,
         enabled = enabled,
-        placeholder = placeholder
+        placeholder = placeholder,
+        isError = isError,
+        supportingText = supportingText,
+        colors = colors
     )
 }

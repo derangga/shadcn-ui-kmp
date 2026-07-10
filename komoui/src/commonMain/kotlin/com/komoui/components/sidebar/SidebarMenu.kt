@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.components.Skeleton
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
@@ -51,12 +52,12 @@ import com.komoui.utils.komoClickable
 enum class SidebarMenuButtonVariant { Default, Outline }
 enum class SidebarMenuButtonSize { Default, Small, Large }
 
-private data class MenuButtonMetrics(val height: Dp, val fontSize: Int, val iconSize: Dp)
+private data class MenuButtonMetrics(val height: Dp, val iconSize: Dp)
 
 private fun SidebarMenuButtonSize.metrics(): MenuButtonMetrics = when (this) {
-    SidebarMenuButtonSize.Default -> MenuButtonMetrics(height = 32.dp, fontSize = 14, iconSize = 18.dp)
-    SidebarMenuButtonSize.Small -> MenuButtonMetrics(height = 28.dp, fontSize = 12, iconSize = 16.dp)
-    SidebarMenuButtonSize.Large -> MenuButtonMetrics(height = 48.dp, fontSize = 14, iconSize = 20.dp)
+    SidebarMenuButtonSize.Default -> MenuButtonMetrics(height = 32.dp, iconSize = 18.dp)
+    SidebarMenuButtonSize.Small -> MenuButtonMetrics(height = 28.dp, iconSize = 16.dp)
+    SidebarMenuButtonSize.Large -> MenuButtonMetrics(height = 48.dp, iconSize = 20.dp)
 }
 
 // ---------------------------------------------------------------------------
@@ -187,12 +188,13 @@ fun SidebarMenuButton(
         }
     }
 
-    val tooltipEnabled = tooltip != null && state.isCollapsedIcon && !state.isMobile
-    if (tooltipEnabled) {
+    val tooltipState = rememberTooltipState()
+    val tooltipText = tooltip
+    if (tooltipText != null && state.isCollapsedIcon && !state.isMobile) {
         TooltipBox(
             positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-            tooltip = { PlainTooltip { Text(tooltip!!) } },
-            state = rememberTooltipState(),
+            tooltip = { PlainTooltip { Text(tooltipText) } },
+            state = tooltipState,
             content = { button() },
         )
     } else {
@@ -228,8 +230,8 @@ fun SidebarMenuButton(
         Text(
             text = text,
             color = contentColor,
-            fontSize = metrics.fontSize.sp,
-            fontWeight = FontWeight.Medium,
+            style = if (size == SidebarMenuButtonSize.Small) MaterialTheme.komoTypography.labelMedium
+            else MaterialTheme.komoTypography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
@@ -249,7 +251,6 @@ fun SidebarMenuButton(
 fun SidebarMenuAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    @Suppress("UNUSED_PARAMETER") showOnHover: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val state = LocalSidebarState.current
@@ -381,7 +382,11 @@ fun SidebarMenuSubButton(
 
     val styles = MaterialTheme.styles
     val backgroundColor = if (isActive) styles.sidebarAccent else Color.Unspecified
-    val height = if (size == SidebarMenuButtonSize.Small) 24.dp else 28.dp
+    val height = when (size) {
+        SidebarMenuButtonSize.Small -> 24.dp
+        SidebarMenuButtonSize.Default -> 28.dp
+        SidebarMenuButtonSize.Large -> 32.dp
+    }
     val shape = RoundedCornerShape(MaterialTheme.radius.md)
 
     val clickHandler: () -> Unit = {
