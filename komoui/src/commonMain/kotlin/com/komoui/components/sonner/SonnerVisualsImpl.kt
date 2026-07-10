@@ -9,11 +9,17 @@ import androidx.compose.material3.SnackbarVisuals
  * Defines the visual style variants for the Sonner snackbar.
  *
  * - [Default] uses the standard snackbar colors from the theme.
- * - [Destructive] uses destructive/error colors to indicate a failure or warning.
+ * - [Destructive] uses destructive/error colors to indicate a failure.
+ * - [Success]/[Info]/[Warning] tint the border and content to match shadcn's rich-color toasts.
+ * - [Loading] uses neutral colors, intended for in-progress notifications.
  */
 enum class SonnerVariant {
     Default,
     Destructive,
+    Success,
+    Info,
+    Warning,
+    Loading,
 }
 
 /**

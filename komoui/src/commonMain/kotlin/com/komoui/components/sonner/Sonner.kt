@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
@@ -27,7 +28,6 @@ import com.komoui.components.Button
 import com.komoui.components.ButtonSize
 import com.komoui.components.ButtonVariant
 import com.komoui.themes.radius
-import androidx.compose.ui.graphics.Color
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
@@ -155,11 +155,13 @@ private data class SonnerColors(
     val border: Color
 )
 
+// ponytail: fixed hues; shadcn rich-color toasts are theme-independent by design.
+// Promote to KomoStyles tokens if the theme grows semantic success/info/warning colors.
 private fun resolveSonnerColors(
     variant: SonnerVariant,
     styles: KomoStyles
 ): SonnerColors = when (variant) {
-    SonnerVariant.Default -> SonnerColors(
+    SonnerVariant.Default, SonnerVariant.Loading -> SonnerColors(
         containerColor = styles.snackbar,
         contentColor = styles.foreground,
         actionContentColor = styles.mutedForeground,
@@ -170,5 +172,23 @@ private fun resolveSonnerColors(
         contentColor = styles.destructiveForeground,
         actionContentColor = styles.destructiveForeground,
         border = styles.destructive
+    )
+    SonnerVariant.Success -> SonnerColors(
+        containerColor = styles.snackbar,
+        contentColor = Color(0xFF15803D),
+        actionContentColor = styles.mutedForeground,
+        border = Color(0xFF22C55E)
+    )
+    SonnerVariant.Info -> SonnerColors(
+        containerColor = styles.snackbar,
+        contentColor = Color(0xFF1D4ED8),
+        actionContentColor = styles.mutedForeground,
+        border = Color(0xFF3B82F6)
+    )
+    SonnerVariant.Warning -> SonnerColors(
+        containerColor = styles.snackbar,
+        contentColor = Color(0xFFB45309),
+        actionContentColor = styles.mutedForeground,
+        border = Color(0xFFF59E0B)
     )
 }
