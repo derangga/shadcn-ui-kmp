@@ -785,7 +785,6 @@ private fun YearPickerDialog(
 }
 
 data class CalendarStyle(
-    val background: Color,
     val border: Color,
     val leftIconTint: Color,
     val rightIconTint: Color,
@@ -830,7 +829,6 @@ object CalendarDefaults {
     @Composable
     private fun colorsFrom(colors: KomoStyles): CalendarStyle {
         return CalendarStyle(
-            background = colors.background,
             border = colors.border,
             leftIconTint = colors.foreground,
             rightIconTint = colors.foreground,

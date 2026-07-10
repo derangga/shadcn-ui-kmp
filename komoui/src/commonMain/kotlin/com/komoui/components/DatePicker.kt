@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -102,6 +103,7 @@ fun DatePicker(
     dateTimeFormat: DateFormatter? = null,
     onDateSelected: (LocalDate) -> Unit,
     placeholder: String = "Pick a date",
+    enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors(),
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -115,6 +117,7 @@ fun DatePicker(
         displayText = formattedDate,
         hasValue = selectedDate != null,
         placeholder = placeholder,
+        enabled = enabled,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
     ) { onDismiss ->
@@ -140,6 +143,7 @@ fun DateRangePicker(
     dateTimeFormat: DateFormatter? = null,
     onRangeSelected: (DateRange) -> Unit,
     placeholder: String = "Pick a date range",
+    enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors(),
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -155,6 +159,7 @@ fun DateRangePicker(
         displayText = formattedRange,
         hasValue = selectedRange != null,
         placeholder = placeholder,
+        enabled = enabled,
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
     ) { onDismiss ->
@@ -184,6 +189,7 @@ private fun DatePickerScaffold(
     displayText: String?,
     hasValue: Boolean,
     placeholder: String,
+    enabled: Boolean,
     leadingIcon: @Composable (() -> Unit)?,
     trailingIcon: @Composable (() -> Unit)?,
     popover: @Composable (onDismiss: () -> Unit) -> Unit,
@@ -201,7 +207,7 @@ private fun DatePickerScaffold(
         animationSpec = tween(150), label = "datePickerBorderColor"
     )
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.alpha(if (enabled) 1f else 0.5f)) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -210,6 +216,7 @@ private fun DatePickerScaffold(
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .komoClickable(
                     onClick = { showCalendarPopup = !showCalendarPopup },
+                    enabled = enabled,
                     role = Role.DropdownList,
                     shape = RoundedCornerShape(radius.md),
                     stateDescription = if (showCalendarPopup) "Expanded" else "Collapsed",
