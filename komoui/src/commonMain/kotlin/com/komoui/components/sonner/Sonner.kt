@@ -50,8 +50,8 @@ import com.komoui.utils.komoClickable
  */
 @Composable
 fun Sonner(
-    modifier: Modifier = Modifier,
     title: String,
+    modifier: Modifier = Modifier,
     subtitle: String? = null,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,

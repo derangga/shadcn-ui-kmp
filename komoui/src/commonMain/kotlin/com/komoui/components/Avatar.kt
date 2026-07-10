@@ -45,10 +45,10 @@ import com.komoui.themes.styles
 @Composable
 fun Avatar(
     model: Any?,
+    fallbackText: String,
     modifier: Modifier = Modifier,
     size: Dp = 40.dp,
     contentDescription: String? = null,
-    fallbackText: String,
     loadingContent: @Composable (() -> Unit)? = null,
     errorContent: @Composable (() -> Unit)? = null,
     contentScale: ContentScale = ContentScale.Crop

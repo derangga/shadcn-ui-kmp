@@ -65,8 +65,8 @@ import com.komoui.themes.styles
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Drawer(
-    onDismissRequest: () -> Unit,
     open: Boolean,
+    onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     description: @Composable () -> Unit,
     modifier: Modifier = Modifier,

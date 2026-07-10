@@ -98,10 +98,10 @@ class DateFormatter(private val pattern: String) {
 
 @Composable
 fun DatePicker(
+    onDateSelected: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     selectedDate: LocalDate? = null,
     dateTimeFormat: DateFormatter? = null,
-    onDateSelected: (LocalDate) -> Unit,
     placeholder: String = "Pick a date",
     enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
@@ -138,10 +138,10 @@ fun DatePicker(
 
 @Composable
 fun DateRangePicker(
+    onRangeSelected: (DateRange) -> Unit,
     modifier: Modifier = Modifier,
     selectedRange: DateRange? = null,
     dateTimeFormat: DateFormatter? = null,
-    onRangeSelected: (DateRange) -> Unit,
     placeholder: String = "Pick a date range",
     enabled: Boolean = true,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,

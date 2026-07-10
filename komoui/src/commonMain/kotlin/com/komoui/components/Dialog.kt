@@ -48,8 +48,8 @@ import androidx.compose.ui.window.DialogProperties
  */
 @Composable
 fun Dialog(
-    onDismissRequest: () -> Unit,
     open: Boolean,
+    onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     header: (@Composable ColumnScope.() -> Unit)? = null,
     body: (@Composable ColumnScope.() -> Unit)? = null,

@@ -42,6 +42,7 @@ fun PopoverPage() {
         ) {
             Popover(
                 open = showPopover,
+                onDismissRequest = { showPopover = false },
                 trigger = {
                     Button(onClick = { showPopover = !showPopover }) {
                         Text("Open Popover")

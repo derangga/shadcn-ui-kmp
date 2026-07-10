@@ -40,12 +40,12 @@ import com.komoui.themes.styles
  */
 @Composable
 fun AlertDialog(
-    onDismissRequest: () -> Unit,
     open: Boolean,
-    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     description: @Composable () -> Unit,
     actions: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     properties: DialogProperties = DialogProperties(
         dismissOnBackPress = false,
         dismissOnClickOutside = false

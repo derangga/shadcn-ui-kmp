@@ -23,9 +23,9 @@ import com.komoui.utils.rememberAnchoredPopupPositionProvider
 @Composable
 fun Popover(
     open: Boolean,
-    modifier: Modifier = Modifier,
-    onDismissRequest: (() -> Unit)? = null,
+    onDismissRequest: () -> Unit,
     trigger: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     val styles = MaterialTheme.styles
