@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
+import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 import com.komoui.utils.rememberAnchoredPopupPositionProvider
@@ -204,7 +205,7 @@ private fun DatePickerScaffold(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(KomoFieldDefaults.Height)
                 .clip(RoundedCornerShape(radius.md))
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .komoClickable(

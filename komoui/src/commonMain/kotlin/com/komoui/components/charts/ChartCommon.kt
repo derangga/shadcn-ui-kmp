@@ -276,7 +276,9 @@ internal fun DrawScope.drawAxesAndGrid(
     val span = domain.endInclusive - domain.start
     if (span <= 0f) return
 
-    val dashEffect = PathEffect.dashPathEffect(floatArrayOf(4f, 4f))
+    val strokePx = 1.dp.toPx()
+    val gap4 = 4.dp.toPx()
+    val dashEffect = PathEffect.dashPathEffect(floatArrayOf(gap4, gap4))
 
     if (axisOptions.showHorizontalGrid) {
         yTicks.forEach { tick ->
@@ -285,7 +287,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 color = gridColor,
                 start = Offset(plotRect.left, y),
                 end = Offset(plotRect.right, y),
-                strokeWidth = 1f,
+                strokeWidth = strokePx,
                 pathEffect = if (tick == domain.start) null else dashEffect,
             )
         }
@@ -299,7 +301,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 color = gridColor,
                 start = Offset(x, plotRect.top),
                 end = Offset(x, plotRect.bottom),
-                strokeWidth = 1f,
+                strokeWidth = strokePx,
                 pathEffect = dashEffect,
             )
         }
@@ -314,7 +316,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 textLayoutResult = measured,
                 color = labelColor,
                 topLeft = Offset(
-                    x = plotRect.left - measured.size.width - 4f,
+                    x = plotRect.left - measured.size.width - 4.dp.toPx(),
                     y = y - measured.size.height / 2f,
                 ),
             )
@@ -332,7 +334,7 @@ internal fun DrawScope.drawAxesAndGrid(
                 color = labelColor,
                 topLeft = Offset(
                     x = centerX - measured.size.width / 2f,
-                    y = plotRect.bottom + 6f,
+                    y = plotRect.bottom + 6.dp.toPx(),
                 ),
             )
         }
@@ -367,7 +369,7 @@ internal fun DrawScope.drawYAxisOnly(
             textLayoutResult = measured,
             color = labelColor,
             topLeft = Offset(
-                x = yAxisRect.right - measured.size.width - 4f,
+                x = yAxisRect.right - measured.size.width - 4.dp.toPx(),
                 y = y - measured.size.height / 2f,
             ),
         )
@@ -386,12 +388,13 @@ internal fun DrawScope.drawScrubIndicator(
     if (columnCount <= 0) return
     val slot = plotRect.width / columnCount
     val x = plotRect.left + slot * (activeIndex + 0.5f)
+    val dash = 3.dp.toPx()
     drawLine(
         color = color,
         start = Offset(x, plotRect.top),
         end = Offset(x, plotRect.bottom),
-        strokeWidth = 1f,
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(3f, 3f)),
+        strokeWidth = 1.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(dash, dash)),
     )
 }
 

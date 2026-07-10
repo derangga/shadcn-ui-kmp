@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
+import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.styles
 
 enum class InputVariant {
@@ -147,7 +148,7 @@ fun Input(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .defaultMinSize(minHeight = 44.dp)
+                .defaultMinSize(minHeight = KomoFieldDefaults.Height)
                 // Expose the error state to screen readers (visual-only border color otherwise).
                 .then(if (isError) Modifier.semantics { error("Invalid input") } else Modifier)
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)

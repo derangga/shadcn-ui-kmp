@@ -52,6 +52,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
+import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 import com.komoui.utils.rememberAnchoredPopupPositionProvider
@@ -126,7 +127,7 @@ fun ComboBox(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(KomoFieldDefaults.Height)
                 .onGloballyPositioned { coordinates ->
                     inputWidthPx = coordinates.size.width
                 }

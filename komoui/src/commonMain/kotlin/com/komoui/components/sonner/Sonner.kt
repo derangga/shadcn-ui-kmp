@@ -30,6 +30,7 @@ import com.komoui.components.ButtonVariant
 import com.komoui.themes.radius
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
 
@@ -133,15 +134,12 @@ fun Sonner(
         ) {
             Text(
                 text = title,
-                style = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                style = MaterialTheme.komoTypography.titleEmphasis
             )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    style = TextStyle(fontSize = 14.sp)
+                    style = MaterialTheme.komoTypography.body
                 )
             }
         }
