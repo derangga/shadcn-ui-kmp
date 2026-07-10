@@ -52,6 +52,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
+import com.komoui.themes.FieldColors
 import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
@@ -81,6 +82,7 @@ fun ComboBox(
     placeholder: String = "Select option...",
     isError: Boolean = false,
     supportingText: String? = null,
+    colors: FieldColors = KomoFieldDefaults.colors(),
     dropdownMaxHeight: Dp = 200.dp
 ) {
     val styles = MaterialTheme.styles
@@ -114,15 +116,15 @@ fun ComboBox(
 
     val currentBorderColor by animateColorAsState(
         targetValue = when {
-            isError -> styles.destructive
-            !enabled -> styles.border
-            isFocused || isPressed || expanded -> styles.ring
-            else -> styles.border
+            isError -> colors.errorBorder
+            !enabled -> colors.border
+            isFocused || isPressed || expanded -> colors.focusedBorder
+            else -> colors.border
         },
         animationSpec = tween(150), label = "comboboxBorderColor"
     )
 
-    val textColor = if (enabled) styles.foreground else styles.mutedForeground
+    val textColor = if (enabled) colors.text else colors.placeholder
     val iconTint = styles.mutedForeground
     val containerBackground = if (enabled) Color.Transparent else styles.muted
 
@@ -170,7 +172,7 @@ fun ComboBox(
             ) {
                 Text(
                     text = selectedOption ?: placeholder,
-                    color = if (selectedOption != null) textColor else styles.mutedForeground,
+                    color = if (selectedOption != null) textColor else colors.placeholder,
                     style = MaterialTheme.komoTypography.body,
                     modifier = Modifier.weight(1f)
                 )
@@ -186,7 +188,7 @@ fun ComboBox(
         if (supportingText != null) {
             Text(
                 text = supportingText,
-                color = if (isError) styles.destructive else styles.mutedForeground,
+                color = if (isError) colors.errorSupportingText else colors.supportingText,
                 style = MaterialTheme.komoTypography.label,
                 modifier = Modifier.padding(top = 4.dp)
             )

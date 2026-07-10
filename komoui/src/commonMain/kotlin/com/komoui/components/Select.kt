@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
+import com.komoui.themes.FieldColors
 import com.komoui.themes.KomoFieldDefaults
 import com.komoui.themes.styles
 import com.komoui.themes.komoTypography
@@ -83,7 +84,8 @@ fun <T> Select(
     enabled: Boolean = true,
     placeholder: String = "Select option...",
     isError: Boolean = false,
-    supportingText: String? = null
+    supportingText: String? = null,
+    colors: FieldColors = KomoFieldDefaults.colors()
 ) {
     val styles = MaterialTheme.styles
     val radius = MaterialTheme.radius
@@ -100,9 +102,9 @@ fun <T> Select(
 
     val currentBorderColor by animateColorAsState(
         targetValue = when {
-            isError -> styles.destructive
-            enabled && (isFocused || isPressed || expanded) -> styles.ring
-            else -> styles.border
+            isError -> colors.errorBorder
+            enabled && (isFocused || isPressed || expanded) -> colors.focusedBorder
+            else -> colors.border
         },
         animationSpec = tween(150), label = "selectBorderColor"
     )
@@ -144,7 +146,7 @@ fun <T> Select(
                 // Display selected option or placeholder
                 Text(
                     text = displayText ?: placeholder,
-                    color = if (displayText != null) styles.foreground else styles.mutedForeground,
+                    color = if (displayText != null) colors.text else colors.placeholder,
                     style = MaterialTheme.komoTypography.body,
                     modifier = Modifier.weight(1f)
                 )
@@ -162,7 +164,7 @@ fun <T> Select(
         if (supportingText != null) {
             Text(
                 text = supportingText,
-                color = if (isError) styles.destructive else styles.mutedForeground,
+                color = if (isError) colors.errorSupportingText else colors.supportingText,
                 style = MaterialTheme.komoTypography.label,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -264,7 +266,8 @@ fun Select(
     enabled: Boolean = true,
     placeholder: String = "Select option...",
     isError: Boolean = false,
-    supportingText: String? = null
+    supportingText: String? = null,
+    colors: FieldColors = KomoFieldDefaults.colors()
 ) {
     Select(
         options = options,
@@ -275,6 +278,7 @@ fun Select(
         enabled = enabled,
         placeholder = placeholder,
         isError = isError,
-        supportingText = supportingText
+        supportingText = supportingText,
+        colors = colors
     )
 }
