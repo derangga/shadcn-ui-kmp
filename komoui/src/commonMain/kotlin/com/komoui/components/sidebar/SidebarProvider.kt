@@ -181,7 +181,9 @@ private fun SidebarLayoutImpl(state: SidebarState, slots: SidebarSlots) {
         CompositionLocalProvider(LocalLayoutDirection provides outerDirection) {
             ModalNavigationDrawer(
                 drawerState = drawerState,
-                gesturesEnabled = state.isOpenMobile,
+                // Enable swipe (edge-swipe-to-open + swipe-to-close), the Material drawer default;
+                // only None (non-collapsible) opts out.
+                gesturesEnabled = state.collapsible != SidebarCollapsible.None,
                 drawerContent = {
                     // Restore the host's direction inside drawer content so text doesn't mirror.
                     CompositionLocalProvider(LocalLayoutDirection provides hostDirection) {

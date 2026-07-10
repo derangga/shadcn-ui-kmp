@@ -187,12 +187,13 @@ fun SidebarMenuButton(
         }
     }
 
-    val tooltipEnabled = tooltip != null && state.isCollapsedIcon && !state.isMobile
-    if (tooltipEnabled) {
+    val tooltipState = rememberTooltipState()
+    val tooltipText = tooltip
+    if (tooltipText != null && state.isCollapsedIcon && !state.isMobile) {
         TooltipBox(
             positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
-            tooltip = { PlainTooltip { Text(tooltip!!) } },
-            state = rememberTooltipState(),
+            tooltip = { PlainTooltip { Text(tooltipText) } },
+            state = tooltipState,
             content = { button() },
         )
     } else {
@@ -249,7 +250,6 @@ fun SidebarMenuButton(
 fun SidebarMenuAction(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    @Suppress("UNUSED_PARAMETER") showOnHover: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val state = LocalSidebarState.current
@@ -381,7 +381,11 @@ fun SidebarMenuSubButton(
 
     val styles = MaterialTheme.styles
     val backgroundColor = if (isActive) styles.sidebarAccent else Color.Unspecified
-    val height = if (size == SidebarMenuButtonSize.Small) 24.dp else 28.dp
+    val height = when (size) {
+        SidebarMenuButtonSize.Small -> 24.dp
+        SidebarMenuButtonSize.Default -> 28.dp
+        SidebarMenuButtonSize.Large -> 32.dp
+    }
     val shape = RoundedCornerShape(MaterialTheme.radius.md)
 
     val clickHandler: () -> Unit = {
