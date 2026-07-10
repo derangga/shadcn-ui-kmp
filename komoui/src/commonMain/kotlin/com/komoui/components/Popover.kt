@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import com.komoui.utils.PopupAlignment
@@ -53,9 +54,8 @@ fun Popover(
                             .padding(12.dp)
                     ) {
                         ProvideTextStyle(
-                            value = TextStyle(
-                                color = styles.popoverForeground,
-                                fontSize = 14.sp
+                            value = MaterialTheme.komoTypography.body.copy(
+                                color = styles.popoverForeground
                             )
                         ) {
                             content()

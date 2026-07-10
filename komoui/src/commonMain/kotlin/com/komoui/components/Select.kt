@@ -145,7 +145,7 @@ fun <T> Select(
                 Text(
                     text = displayText ?: placeholder,
                     color = if (displayText != null) styles.foreground else styles.mutedForeground,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.komoTypography.body,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
@@ -220,7 +220,7 @@ fun <T> Select(
                                         Text(
                                             text = label(option),
                                             color = optionTextColor,
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.komoTypography.body,
                                             modifier = Modifier.weight(1f)
                                         )
                                         if (isSelected) {

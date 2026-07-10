@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 enum class AlertVariant {
@@ -73,18 +74,13 @@ fun Alert(
 
         Column {
             ProvideTextStyle(
-                value = TextStyle(
-                    color = titleColor, fontSize = 16.sp, fontWeight = FontWeight.SemiBold
-                )
+                value = MaterialTheme.komoTypography.title.copy(color = titleColor)
             ) {
                 title()
             }
             Spacer(modifier = Modifier.height(4.dp))
             ProvideTextStyle(
-                value = TextStyle(
-                    color = descriptionColor,
-                    fontSize = 14.sp,
-                )
+                value = MaterialTheme.komoTypography.body.copy(color = descriptionColor)
             ) {
                 description()
             }

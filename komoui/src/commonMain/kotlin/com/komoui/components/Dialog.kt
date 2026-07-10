@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import androidx.compose.ui.window.Dialog as ComposeDialog
 import androidx.compose.ui.window.DialogProperties
@@ -126,10 +127,8 @@ fun DialogTitle(
     content: @Composable () -> Unit
 ) {
     ProvideTextStyle(
-        value = TextStyle(
-            color = MaterialTheme.styles.foreground,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold
+        value = MaterialTheme.komoTypography.titleLarge.copy(
+            color = MaterialTheme.styles.foreground
         )
     ) {
         Column(modifier = modifier) {
@@ -148,9 +147,8 @@ fun DialogDescription(
     content: @Composable () -> Unit
 ) {
     ProvideTextStyle(
-        value = TextStyle(
-            color = MaterialTheme.styles.mutedForeground,
-            fontSize = 14.sp
+        value = MaterialTheme.komoTypography.body.copy(
+            color = MaterialTheme.styles.mutedForeground
         )
     ) {
         Column(modifier = modifier) {

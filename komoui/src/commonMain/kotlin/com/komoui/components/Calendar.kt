@@ -53,6 +53,7 @@ import androidx.compose.ui.window.Dialog
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoSelectable
 import kotlinx.datetime.DayOfWeek
@@ -302,13 +303,9 @@ fun Calendar(
         ).map { strings.weekdayNamesShort[it.ordinal] }
     }
 
-    // Pre-compute text styles used in the day grid
-    val dayTextStyleNormal = remember {
-        TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal)
-    }
-    val dayTextStyleBold = remember {
-        TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-    }
+    // Text styles used in the day grid
+    val dayTextStyleNormal = MaterialTheme.komoTypography.body
+    val dayTextStyleBold = MaterialTheme.komoTypography.body.copy(fontWeight = FontWeight.SemiBold)
 
     Box(
         modifier = modifier
@@ -349,10 +346,7 @@ fun Calendar(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = strings.monthNamesShort[currentMonth.month.ordinal],
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
+                                style = MaterialTheme.komoTypography.titleMedium,
                                 color = colors.monthText
                             )
                             Icon(
@@ -375,10 +369,7 @@ fun Calendar(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = currentMonth.year.toString(),
-                                style = TextStyle(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
+                                style = MaterialTheme.komoTypography.titleMedium,
                                 color = colors.yearText
                             )
                             Icon(
@@ -409,10 +400,8 @@ fun Calendar(
                         text = weekday,
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            color = colors.weekDaysText,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                        style = MaterialTheme.komoTypography.labelMedium.copy(
+                            color = colors.weekDaysText
                         )
                     )
                 }
@@ -716,10 +705,8 @@ private fun MonthPickerDialog(
                     ) {
                         Text(
                             text = MaterialTheme.komoStrings.monthNamesFull[month.ordinal],
-                            style = TextStyle(
-                                color = textColor,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                            style = MaterialTheme.komoTypography.titleMedium.copy(
+                                color = textColor
                             )
                         )
                     }
@@ -791,10 +778,8 @@ private fun YearPickerDialog(
                     ) {
                         Text(
                             text = year.toString(),
-                            style = TextStyle(
-                                color = textColor,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
+                            style = MaterialTheme.komoTypography.titleMedium.copy(
+                                color = textColor
                             )
                         )
                     }

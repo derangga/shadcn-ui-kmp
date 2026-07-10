@@ -52,6 +52,7 @@ import com.komoui.components.Input
 import com.komoui.components.InputVariant
 import com.komoui.themes.drawShadows
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
@@ -431,8 +432,7 @@ fun SidebarHeader(
             if (icon != null) icon()
             Text(
                 text = title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.komoTypography.title,
                 color = MaterialTheme.styles.sidebarForeground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -495,7 +495,7 @@ fun SidebarFooter(
             if (icon != null) icon()
             Text(
                 text = text,
-                fontSize = 12.sp,
+                style = MaterialTheme.komoTypography.label,
                 color = MaterialTheme.styles.mutedForeground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

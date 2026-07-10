@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
 import com.komoui.themes.KomoFieldDefaults
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 enum class InputVariant {
@@ -155,11 +156,7 @@ fun Input(
                 .then(borderStyle),
             enabled = enabled,
             readOnly = readOnly,
-            textStyle = TextStyle(
-                color = textColor,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal
-            ),
+            textStyle = MaterialTheme.komoTypography.body.copy(color = textColor),
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
@@ -190,10 +187,8 @@ fun Input(
                         if (value.isEmpty()) {
                             Text(
                                 text = placeholder,
-                                style = TextStyle(
-                                    color = placeholderColor,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal
+                                style = MaterialTheme.komoTypography.body.copy(
+                                    color = placeholderColor
                                 )
                             )
                         }
@@ -215,9 +210,8 @@ fun Input(
         supportingText?.let {
             Spacer(modifier = Modifier.height(2.dp))
             ProvideTextStyle(
-                value = TextStyle(
-                    color = colors.supportingText,
-                    fontSize = 12.sp
+                value = MaterialTheme.komoTypography.label.copy(
+                    color = colors.supportingText
                 )
             ) {
                 it()

@@ -23,6 +23,7 @@ internal val DefaultTypography: Typography = Typography(
  *
  * @property titleLarge 18sp SemiBold — section / dialog headings.
  * @property title 16sp SemiBold — card and header titles.
+ * @property titleMedium 16sp Medium — calendar/accordion headers and nav labels.
  * @property titleEmphasis 16sp Bold — emphasized titles (e.g. Sonner).
  * @property body 14sp Normal — default body text and form fields.
  * @property bodyMedium 14sp Medium — menu items, tabs, buttons.
@@ -32,6 +33,7 @@ internal val DefaultTypography: Typography = Typography(
 data class KomoTypography(
     val titleLarge: TextStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold),
     val title: TextStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
+    val titleMedium: TextStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium),
     val titleEmphasis: TextStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
     val body: TextStyle = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
     val bodyMedium: TextStyle = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),

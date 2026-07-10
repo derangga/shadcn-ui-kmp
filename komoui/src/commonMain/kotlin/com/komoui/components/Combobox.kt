@@ -171,7 +171,7 @@ fun ComboBox(
                 Text(
                     text = selectedOption ?: placeholder,
                     color = if (selectedOption != null) textColor else styles.mutedForeground,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.komoTypography.body,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
@@ -267,7 +267,7 @@ fun ComboBox(
                                         Text(
                                             text = option,
                                             color = if (isSelected) styles.accentForeground else styles.popoverForeground,
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.komoTypography.body,
                                             modifier = Modifier.weight(1f)
                                         )
                                         if (isSelected) {

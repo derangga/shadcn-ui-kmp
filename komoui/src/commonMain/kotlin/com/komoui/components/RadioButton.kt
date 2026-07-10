@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 import com.komoui.utils.komoSelectable
 
@@ -126,10 +127,8 @@ fun <T> RadioGroupScope<T>.RadioButtonWithLabel(
         )
         Text(
             text = label,
-            style = TextStyle(
-                color = if (enabled) themeColors.foreground else themeColors.mutedForeground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+            style = MaterialTheme.komoTypography.bodyMedium.copy(
+                color = if (enabled) themeColors.foreground else themeColors.mutedForeground
             )
         )
     }

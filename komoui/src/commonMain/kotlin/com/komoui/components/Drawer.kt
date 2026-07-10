@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 /**
@@ -164,19 +165,16 @@ fun Drawer(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         ProvideTextStyle(
-                            value = TextStyle(
-                                color = styles.foreground,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold
+                            value = MaterialTheme.komoTypography.titleLarge.copy(
+                                color = styles.foreground
                             )
                         ) {
                             title()
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         ProvideTextStyle(
-                            value = TextStyle(
-                                color = styles.mutedForeground,
-                                fontSize = 14.sp
+                            value = MaterialTheme.komoTypography.body.copy(
+                                color = styles.mutedForeground
                             )
                         ) {
                             description()

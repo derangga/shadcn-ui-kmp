@@ -252,7 +252,7 @@ private fun DatePickerScaffold(
                 Text(
                     text = displayText ?: placeholder,
                     color = if (hasValue) themeColors.foreground else themeColors.mutedForeground,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.komoTypography.body,
                     modifier = Modifier.weight(1f)
                 )
                 if (trailingIcon != null) {

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.komoui.themes.radius
+import com.komoui.themes.komoTypography
 import com.komoui.themes.styles
 
 /**
@@ -67,19 +68,16 @@ fun AlertDialog(
                 // Header (Title and Description)
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ProvideTextStyle(
-                        value = TextStyle(
-                            color = styles.foreground,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold
+                        value = MaterialTheme.komoTypography.titleLarge.copy(
+                            color = styles.foreground
                         )
                     ) {
                         title()
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     ProvideTextStyle(
-                        value = TextStyle(
-                            color = styles.mutedForeground,
-                            fontSize = 14.sp
+                        value = MaterialTheme.komoTypography.body.copy(
+                            color = styles.mutedForeground
                         )
                     ) {
                         description()
