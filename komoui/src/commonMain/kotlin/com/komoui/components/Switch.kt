@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.komoui.themes.KomoStyles
 import com.komoui.themes.styles
 import com.komoui.utils.komoToggleable
 
@@ -132,9 +133,7 @@ data class SwitchStyle(
 )
 
 object SwitchDefaults {
-    @Composable
-    fun colors(): SwitchStyle {
-        val styles = MaterialTheme.styles
+    private fun colorsFrom(styles: KomoStyles): SwitchStyle {
         return SwitchStyle(
             checkedBorder = styles.primary,
             checkedTrack = styles.primary,
@@ -144,4 +143,11 @@ object SwitchDefaults {
             uncheckedThumb = styles.primary
         )
     }
+
+    @Composable
+    fun colors(): SwitchStyle = colorsFrom(MaterialTheme.styles)
+
+    @Composable
+    fun colors(overrides: SwitchStyle.() -> SwitchStyle): SwitchStyle =
+        colorsFrom(MaterialTheme.styles).overrides()
 }
