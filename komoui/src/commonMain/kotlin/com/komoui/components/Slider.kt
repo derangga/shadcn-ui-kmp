@@ -10,16 +10,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SliderColors
 import androidx.compose.material3.Slider as ComposeSlider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.komoui.themes.KomoStyles
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 
+/**
+ * @param colors The [SliderStyle] resolving the slider's colors. See [SliderDefaults.colors].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Slider(
@@ -29,9 +32,8 @@ fun Slider(
     valueRange: ClosedFloatingPointRange<Float> = 0f..1f,
     steps: Int = 0,
     enabled: Boolean = true,
-    colors: SliderColors? = null
+    colors: SliderStyle = SliderDefaults.colors()
 ) {
-    val themeColors = MaterialTheme.styles
     val radius = MaterialTheme.radius
     ComposeSlider(
         value = value,
@@ -43,27 +45,19 @@ fun Slider(
         valueRange = valueRange,
         steps = steps,
         enabled = enabled,
-        colors = colors ?: SliderDefaults.colors(
-            thumbColor = themeColors.background,
-            activeTrackColor = themeColors.primary,
-            inactiveTrackColor = themeColors.secondary,
-            disabledThumbColor = themeColors.mutedForeground.copy(alpha = 0.5f),
-            disabledActiveTrackColor = themeColors.primary.copy(alpha = 0.5f),
-            disabledInactiveTrackColor = themeColors.secondary.copy(alpha = 0.5f)
-        ),
         thumb = {
-            val borderColor = if (enabled) themeColors.primary else themeColors.primary.copy(alpha = 0.5f)
+            val borderColor = if (enabled) colors.thumbBorder else colors.thumbBorder.copy(alpha = 0.5f)
             Box(
                 modifier = Modifier
                     .size(20.dp)
                     .clip(CircleShape)
-                    .background(themeColors.background)
+                    .background(colors.thumb)
                     .border(2.dp, borderColor, CircleShape)
             )
         },
         track = {
-            val trackColor = if (enabled) themeColors.secondary else themeColors.secondary.copy(alpha = 0.5f)
-            val activeTrackColor = if (enabled) themeColors.primary else themeColors.primary.copy(alpha = 0.5f)
+            val trackColor = if (enabled) colors.track else colors.track.copy(alpha = 0.5f)
+            val activeTrackColor = if (enabled) colors.activeTrack else colors.activeTrack.copy(alpha = 0.5f)
             // Fraction of the active track; guard the empty range and clamp out-of-range values,
             // since fillMaxWidth() requires a 0..1 fraction.
             val span = valueRange.endInclusive - valueRange.start
@@ -86,4 +80,30 @@ fun Slider(
             }
         }
     )
+}
+
+/** Colors used by a [Slider]. Disabled states are derived at 50% alpha. */
+data class SliderStyle(
+    val thumb: Color,
+    val thumbBorder: Color,
+    val track: Color,
+    val activeTrack: Color,
+)
+
+object SliderDefaults {
+    private fun colorsFrom(styles: KomoStyles): SliderStyle = SliderStyle(
+        thumb = styles.background,
+        thumbBorder = styles.primary,
+        track = styles.secondary,
+        activeTrack = styles.primary,
+    )
+
+    /** [SliderStyle] with the default KomoUI color scheme. */
+    @Composable
+    fun colors(): SliderStyle = colorsFrom(MaterialTheme.styles)
+
+    /** [SliderStyle] with the default scheme, mutated by [overrides]. */
+    @Composable
+    fun colors(overrides: SliderStyle.() -> SliderStyle): SliderStyle =
+        colorsFrom(MaterialTheme.styles).overrides()
 }
