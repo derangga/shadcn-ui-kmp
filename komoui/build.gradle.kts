@@ -120,7 +120,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.derangga",
         artifactId = "komoui",
-        version = "0.3.0"
+        version = "0.4.0"
     )
 
     // Configure POM metadata for the published artifact
