@@ -331,7 +331,10 @@ fun PaginationScope.DefaultPagination() {
  * @param enableSelection When true a leading checkbox column is auto-prepended.
  * @param selectionColumnWidth Width of the auto-injected selection column.
  * @param pageSize Rows per page.
- * @param initialSort Initial sort state.
+ * @param initialSort Initial sort state in uncontrolled mode.
+ * @param sort Controlled sort state. Pass non-null (with [onSortChange]) to drive sorting externally.
+ * @param selectedKeys Controlled selection as a set of [rowKey] values. Pass non-null (with
+ *      [onSelectionChange]) to drive selection externally, e.g. to clear it programmatically.
  * @param onSortChange Observer callback fired when sort changes.
  * @param onSelectionChange Observer callback fired when selection changes. Emits the set of
  *      selected [rowKey] values, so selection survives item-instance refreshes and never
@@ -357,6 +360,8 @@ fun <T> DataTable(
     selectionColumnWidth: Dp = 48.dp,
     pageSize: Int = 10,
     initialSort: SortState = SortState(),
+    sort: SortState? = null,
+    selectedKeys: Set<Any>? = null,
     onSortChange: ((SortState) -> Unit)? = null,
     onSelectionChange: ((Set<Any>) -> Unit)? = null,
     onRowClick: ((T) -> Unit)? = null,
@@ -365,26 +370,29 @@ fun <T> DataTable(
 ) {
     val styles = MaterialTheme.styles
 
-    var sort by remember { mutableStateOf(initialSort) }
+    // Controlled ([sort] non-null) or uncontrolled (seeded by [initialSort]) sort state.
+    var internalSort by remember { mutableStateOf(initialSort) }
+    val effectiveSort = sort ?: internalSort
     val updateSort: (SortState) -> Unit = { next ->
-        sort = next
+        if (sort == null) internalSort = next
         onSortChange?.invoke(next)
     }
 
-    // Selection is stored by rowKey, not item instance, so it survives item refreshes
-    // and can never hold two entries for the same row.
-    var selectedKeySet by remember { mutableStateOf<Set<Any>>(emptySet()) }
+    // Selection is stored by rowKey, not item instance, so it survives item refreshes and can
+    // never hold two entries for the same row. Controlled via [selectedKeys], else internal.
+    var internalSelection by remember { mutableStateOf<Set<Any>>(emptySet()) }
+    val selectedKeySet = selectedKeys ?: internalSelection
     val updateSelection: (Set<Any>) -> Unit = { next ->
-        selectedKeySet = next
+        if (selectedKeys == null) internalSelection = next
         onSelectionChange?.invoke(next)
     }
 
-    val sorted = remember(items, sort, columns) {
-        val col = columns.firstOrNull { it.id == sort.columnId }
+    val sorted = remember(items, effectiveSort, columns) {
+        val col = columns.firstOrNull { it.id == effectiveSort.columnId }
         val cmp = col?.comparator
         when {
-            cmp == null || sort.direction == SortDirection.NONE -> items
-            sort.direction == SortDirection.ASC -> items.sortedWith(cmp)
+            cmp == null || effectiveSort.direction == SortDirection.NONE -> items
+            effectiveSort.direction == SortDirection.ASC -> items.sortedWith(cmp)
             else -> items.sortedWith(cmp.reversed())
         }
     }
@@ -454,10 +462,10 @@ fun <T> DataTable(
                         ) {
                             SortableHeader(
                                 column = col,
-                                sort = sort,
+                                sort = effectiveSort,
                                 onClick = {
                                     if (col.sortable && col.comparator != null) {
-                                        updateSort(nextSort(sort, col.id))
+                                        updateSort(nextSort(effectiveSort, col.id))
                                     }
                                 }
                             )

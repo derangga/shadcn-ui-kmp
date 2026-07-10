@@ -194,7 +194,9 @@ private fun DayOfWeek.toSundayStartIndex(): Int = when (this) {
  * @param modifier The modifier to be applied to the calendar container.
  * @param selectedDate The currently selected date. Null if no date is selected.
  * @param onDateSelected Callback invoked when a date is selected.
- * @param initialMonth The month to display initially. Defaults to current month.
+ * @param initialMonth The month to display initially in uncontrolled mode. Defaults to current month.
+ * @param month Controlled displayed month. Pass non-null (with [onMonthChange]) to drive navigation externally.
+ * @param onMonthChange Called when the displayed month changes (via arrows, pickers, or cross-month day taps).
  * @param dateSelectionMode Defines which dates are clickable (All, PastOrToday, FutureOrToday).
  * @param colors [CalendarStyle] that will be used to resolve the colors used for this calendar in
  */
@@ -204,6 +206,8 @@ fun Calendar(
     selectedDate: LocalDate? = null,
     onDateSelected: (LocalDate) -> Unit,
     initialMonth: YearMonth = YearMonth.now(),
+    month: YearMonth? = null,
+    onMonthChange: ((YearMonth) -> Unit)? = null,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors()
 ) {
@@ -214,6 +218,8 @@ fun Calendar(
             onDateSelected = onDateSelected
         ),
         initialMonth = initialMonth,
+        month = month,
+        onMonthChange = onMonthChange,
         dateSelectionMode = dateSelectionMode,
         colors = colors
     )
@@ -225,7 +231,9 @@ fun Calendar(
  *
  * @param modifier The modifier to be applied to the calendar container.
  * @param selectionMode The selection mode (single or range).
- * @param initialMonth The month to display initially. Defaults to current month.
+ * @param initialMonth The month to display initially in uncontrolled mode. Defaults to current month.
+ * @param month Controlled displayed month. Pass non-null (with [onMonthChange]) to drive navigation externally.
+ * @param onMonthChange Called when the displayed month changes (via arrows, pickers, or cross-month day taps).
  * @param dateSelectionMode Defines which dates are clickable (All, PastOrToday, FutureOrToday).
  * @param colors [CalendarStyle] that will be used to resolve the colors used for this calendar in
  */
@@ -235,14 +243,21 @@ fun Calendar(
     modifier: Modifier = Modifier,
     selectionMode: CalendarSelectionMode,
     initialMonth: YearMonth = YearMonth.now(),
+    month: YearMonth? = null,
+    onMonthChange: ((YearMonth) -> Unit)? = null,
     dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
     colors: CalendarStyle = CalendarDefaults.colors()
 ) {
     val themeColors = MaterialTheme.styles
     val radius = MaterialTheme.radius
     val strings = MaterialTheme.komoStrings
-    // Keyed on initialMonth so the view navigates when the caller changes it after first composition.
-    var currentMonth by remember(initialMonth) { mutableStateOf(initialMonth) }
+    // Controlled ([month] non-null) or uncontrolled (seeded by [initialMonth]) month navigation.
+    var internalMonth by remember(initialMonth) { mutableStateOf(initialMonth) }
+    val currentMonth = month ?: internalMonth
+    val setMonth: (YearMonth) -> Unit = { next ->
+        if (month == null) internalMonth = next
+        onMonthChange?.invoke(next)
+    }
     val today = remember {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     }
@@ -306,7 +321,7 @@ fun Calendar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { currentMonth = currentMonth.minusMonths(1) }) {
+                IconButton(onClick = { setMonth(currentMonth.minusMonths(1)) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.KeyboardArrowLeft,
                         contentDescription = "Previous Month",
@@ -371,7 +386,7 @@ fun Calendar(
                     }
                 }
 
-                IconButton(onClick = { currentMonth = currentMonth.plusMonths(1) }) {
+                IconButton(onClick = { setMonth(currentMonth.plusMonths(1)) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
                         contentDescription = "Next Month",
@@ -592,7 +607,7 @@ fun Calendar(
                                         }
                                         // Navigate to the selected date's month if it's not current month
                                         if (!isCurrentMonth) {
-                                            currentMonth = YearMonth.from(date)
+                                            setMonth(YearMonth.from(date))
                                         }
                                         },
                                     )
@@ -616,8 +631,8 @@ fun Calendar(
     if (showMonthPicker) {
         MonthPickerDialog(
             currentMonth = currentMonth.month,
-            onMonthSelected = { month ->
-                currentMonth = currentMonth.withMonth(month.ordinal + 1)
+            onMonthSelected = { selected ->
+                setMonth(currentMonth.withMonth(selected.ordinal + 1))
                 showMonthPicker = false
             },
             onDismissRequest = { showMonthPicker = false },
@@ -630,7 +645,7 @@ fun Calendar(
         YearPickerDialog(
             currentYear = currentMonth.year,
             onYearSelected = { year ->
-                currentMonth = currentMonth.withYear(year)
+                setMonth(currentMonth.withYear(year))
                 showYearPicker = false
             },
             onDismissRequest = { showYearPicker = false },
