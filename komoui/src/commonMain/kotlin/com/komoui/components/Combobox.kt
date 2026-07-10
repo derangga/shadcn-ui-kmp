@@ -42,12 +42,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -56,7 +54,7 @@ import com.komoui.themes.radius
 import com.komoui.themes.komoStrings
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
-import kotlin.math.roundToInt
+import com.komoui.utils.rememberAnchoredPopupPositionProvider
 
 /**
  * A Jetpack Compose Combobox component for KomoUI's Dropdown Menu.
@@ -86,13 +84,10 @@ fun ComboBox(
     var expanded by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf(selectedOption ?: "") }
 
-    // State to hold the position and width of the input field
+    // Width of the trigger, so the popup can match it. Position/flipping is handled by the provider.
     var inputWidthPx by remember { mutableIntStateOf(0) }
-    var inputHeightPx by remember { mutableIntStateOf(0) }
-    var inputXPositionPx by remember { mutableIntStateOf(0) }
-    var inputYPositionPx by remember { mutableIntStateOf(0) }
-
     val density = LocalDensity.current
+    val positionProvider = rememberAnchoredPopupPositionProvider()
 
     // Update searchText when selectedOption changes externally, but only if the dropdown is not expanded
     LaunchedEffect(selectedOption, expanded) {
@@ -134,10 +129,6 @@ fun ComboBox(
                 .height(48.dp)
                 .onGloballyPositioned { coordinates ->
                     inputWidthPx = coordinates.size.width
-                    inputHeightPx = coordinates.size.height
-                    val position = coordinates.parentLayoutCoordinates?.windowToLocal(coordinates.positionInWindow())
-                    inputXPositionPx = position?.x?.roundToInt() ?: 0
-                    inputYPositionPx = position?.y?.roundToInt() ?: 0
                 }
                 .clip(RoundedCornerShape(radius.md))
                 .background(containerBackground)
@@ -190,7 +181,7 @@ fun ComboBox(
         // Dropdown Popup
         if (expanded) {
             Popup(
-                offset = IntOffset(inputXPositionPx, inputYPositionPx + inputHeightPx),
+                popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true),
                 onDismissRequest = {
                     expanded = false

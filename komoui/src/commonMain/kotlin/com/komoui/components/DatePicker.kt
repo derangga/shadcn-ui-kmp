@@ -21,17 +21,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
@@ -39,8 +35,8 @@ import androidx.compose.ui.window.PopupProperties
 import com.komoui.themes.radius
 import com.komoui.themes.styles
 import com.komoui.utils.komoClickable
+import com.komoui.utils.rememberAnchoredPopupPositionProvider
 import kotlinx.datetime.LocalDate
-import kotlin.math.roundToInt
 
 class DateFormatter(private val pattern: String) {
     /**
@@ -128,9 +124,7 @@ fun DatePicker(
     val radius = MaterialTheme.radius
     var showCalendarPopup by remember { mutableStateOf(false) }
 
-    var inputHeightPx by remember { mutableIntStateOf(0) }
-    var inputXPositionPx by remember { mutableIntStateOf(0) }
-    var inputYPositionPx by remember { mutableIntStateOf(0) }
+    val positionProvider = rememberAnchoredPopupPositionProvider()
 
     val formatter = dateTimeFormat ?: DateFormatter.ofPattern("MMM dd, yyyy")
     val formattedDate = selectedDate?.let { formatter.format(it) }
@@ -148,13 +142,6 @@ fun DatePicker(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .onGloballyPositioned { coordinates ->
-                    // Get the size and position of the input field
-                    inputHeightPx = coordinates.size.height
-                    val position = coordinates.parentLayoutCoordinates?.windowToLocal(coordinates.positionInWindow())
-                    inputXPositionPx = position?.x?.roundToInt() ?: 0
-                    inputYPositionPx = position?.y?.roundToInt() ?: 0
-                }
                 .clip(RoundedCornerShape(radius.md))
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .komoClickable(
@@ -193,7 +180,7 @@ fun DatePicker(
         // Calendar Popup
         if (showCalendarPopup) {
             Popup(
-                offset = IntOffset(inputXPositionPx, inputYPositionPx + inputHeightPx),
+                popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true),
                 onDismissRequest = { showCalendarPopup = false }
             ) {
@@ -250,9 +237,7 @@ fun DateRangePicker(
     val radius = MaterialTheme.radius
     var showCalendarPopup by remember { mutableStateOf(false) }
 
-    var inputHeightPx by remember { mutableIntStateOf(0) }
-    var inputXPositionPx by remember { mutableIntStateOf(0) }
-    var inputYPositionPx by remember { mutableIntStateOf(0) }
+    val positionProvider = rememberAnchoredPopupPositionProvider()
 
     val formatter = dateTimeFormat ?: DateFormatter.ofPattern("MMM dd, yyyy")
     val formattedRange = selectedRange?.let {
@@ -272,12 +257,6 @@ fun DateRangePicker(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .onGloballyPositioned { coordinates ->
-                    inputHeightPx = coordinates.size.height
-                    val position = coordinates.parentLayoutCoordinates?.windowToLocal(coordinates.positionInWindow())
-                    inputXPositionPx = position?.x?.roundToInt() ?: 0
-                    inputYPositionPx = position?.y?.roundToInt() ?: 0
-                }
                 .clip(RoundedCornerShape(radius.md))
                 .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
                 .komoClickable(
@@ -315,7 +294,7 @@ fun DateRangePicker(
         // Calendar Popup
         if (showCalendarPopup) {
             Popup(
-                offset = IntOffset(inputXPositionPx, inputYPositionPx + inputHeightPx),
+                popupPositionProvider = positionProvider,
                 properties = PopupProperties(focusable = true),
                 onDismissRequest = { showCalendarPopup = false }
             ) {
