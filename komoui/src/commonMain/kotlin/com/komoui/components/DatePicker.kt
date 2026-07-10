@@ -94,20 +94,6 @@ class DateFormatter(private val pattern: String) {
     }
 }
 
-/**
- * A Jetpack Compose Date Picker component for KomoUI.
- * It combines a clickable input field with a popover containing a calendar.
- *
- * @param modifier The modifier to be applied to the date picker container.
- * @param selectedDate The currently selected date. Null if no date is selected.
- * @param dateTimeFormat The format to use for displaying the selected date.
- * @param onDateSelected Callback invoked when a date is selected.
- * @param placeholder The placeholder text to display when no date is selected.
- * @param dateSelectionMode Defines which dates are clickable in the calendar (All, PastOrToday, FutureOrToday).
- * @param colors [CalendarStyle] that will be used to resolve the colors used for this input in
- * @param leadingIcon Optional composable to display at the start of the input field.
- * @param trailingIcon Optional composable to display at the end of the input field.
- */
 @Composable
 fun DatePicker(
     modifier: Modifier = Modifier,
@@ -120,14 +106,91 @@ fun DatePicker(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
+    val formatter = dateTimeFormat ?: DateFormatter.ofPattern("MMM dd, yyyy")
+    val formattedDate = selectedDate?.let { formatter.format(it) }
+
+    DatePickerScaffold(
+        modifier = modifier,
+        displayText = formattedDate,
+        hasValue = selectedDate != null,
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+    ) { onDismiss ->
+        Calendar(
+            selectionMode = CalendarSelectionMode.Single(
+                selectedDate = selectedDate,
+                onDateSelected = { date ->
+                    onDateSelected(date)
+                    onDismiss()
+                }
+            ),
+            initialMonth = selectedDate?.let { YearMonth.from(it) } ?: YearMonth.now(),
+            dateSelectionMode = dateSelectionMode,
+            colors = colors
+        )
+    }
+}
+
+@Composable
+fun DateRangePicker(
+    modifier: Modifier = Modifier,
+    selectedRange: DateRange? = null,
+    dateTimeFormat: DateFormatter? = null,
+    onRangeSelected: (DateRange) -> Unit,
+    placeholder: String = "Pick a date range",
+    dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
+    colors: CalendarStyle = CalendarDefaults.colors(),
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null
+) {
+    val formatter = dateTimeFormat ?: DateFormatter.ofPattern("MMM dd, yyyy")
+    val formattedRange = selectedRange?.let {
+        "${formatter.format(it.start)} - ${formatter.format(it.end)}"
+    }
+
+    DatePickerScaffold(
+        modifier = modifier,
+        displayText = formattedRange,
+        hasValue = selectedRange != null,
+        placeholder = placeholder,
+        leadingIcon = leadingIcon,
+        trailingIcon = trailingIcon,
+    ) { onDismiss ->
+        Calendar(
+            selectionMode = CalendarSelectionMode.Range(
+                selectedRange = selectedRange,
+                onRangeSelected = { range ->
+                    onRangeSelected(range)
+                    onDismiss()
+                }
+            ),
+            initialMonth = selectedRange?.start?.let { YearMonth.from(it) } ?: YearMonth.now(),
+            dateSelectionMode = dateSelectionMode,
+            colors = colors
+        )
+    }
+}
+
+/**
+ * Shared trigger + popup scaffold behind [DatePicker] and [DateRangePicker]. Renders the bordered
+ * input field showing [displayText] (or [placeholder]) and hosts [popover] in an anchored popup,
+ * passing it a dismiss callback to close after a selection.
+ */
+@Composable
+private fun DatePickerScaffold(
+    modifier: Modifier,
+    displayText: String?,
+    hasValue: Boolean,
+    placeholder: String,
+    leadingIcon: @Composable (() -> Unit)?,
+    trailingIcon: @Composable (() -> Unit)?,
+    popover: @Composable (onDismiss: () -> Unit) -> Unit,
+) {
     val themeColors = MaterialTheme.styles
     val radius = MaterialTheme.radius
     var showCalendarPopup by remember { mutableStateOf(false) }
-
     val positionProvider = rememberAnchoredPopupPositionProvider()
-
-    val formatter = dateTimeFormat ?: DateFormatter.ofPattern("MMM dd, yyyy")
-    val formattedDate = selectedDate?.let { formatter.format(it) }
 
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -164,8 +227,8 @@ fun DatePicker(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 Text(
-                    text = formattedDate ?: placeholder,
-                    color = if (selectedDate != null) themeColors.foreground else themeColors.mutedForeground,
+                    text = displayText ?: placeholder,
+                    color = if (hasValue) themeColors.foreground else themeColors.mutedForeground,
                     fontSize = 14.sp,
                     modifier = Modifier.weight(1f)
                 )
@@ -173,11 +236,9 @@ fun DatePicker(
                     Spacer(modifier = Modifier.width(8.dp))
                     trailingIcon()
                 }
-
             }
         }
 
-        // Calendar Popup
         if (showCalendarPopup) {
             Popup(
                 popupPositionProvider = positionProvider,
@@ -189,132 +250,7 @@ fun DatePicker(
                         .clip(RoundedCornerShape(radius.md))
                         .background(themeColors.popover)
                 ) {
-                    Calendar(
-                        selectionMode = CalendarSelectionMode.Single(
-                            selectedDate = selectedDate,
-                            onDateSelected = { date ->
-                                onDateSelected(date)
-                                showCalendarPopup = false
-                            }
-                        ),
-                        initialMonth = selectedDate?.let { YearMonth.from(it) } ?: YearMonth.now(),
-                        dateSelectionMode = dateSelectionMode,
-                        colors = colors
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * A Jetpack Compose Date Range Picker component for KomoUI.
- * It combines a clickable input field with a popover containing a range-selection calendar.
- *
- * @param modifier The modifier to be applied to the date range picker container.
- * @param selectedRange The currently selected date range. Null if no range is selected.
- * @param dateTimeFormat The format to use for displaying the selected dates.
- * @param onRangeSelected Callback invoked when a complete date range is selected.
- * @param placeholder The placeholder text to display when no range is selected.
- * @param dateSelectionMode Defines which dates are clickable in the calendar (All, PastOrToday, FutureOrToday).
- * @param colors [CalendarStyle] that will be used to resolve the colors used for this input in
- * @param leadingIcon Optional composable to display at the start of the input field.
- * @param trailingIcon Optional composable to display at the end of the input field.
- */
-@Composable
-fun DateRangePicker(
-    modifier: Modifier = Modifier,
-    selectedRange: DateRange? = null,
-    dateTimeFormat: DateFormatter? = null,
-    onRangeSelected: (DateRange) -> Unit,
-    placeholder: String = "Pick a date range",
-    dateSelectionMode: DateSelectionMode = DateSelectionMode.All,
-    colors: CalendarStyle = CalendarDefaults.colors(),
-    leadingIcon: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit)? = null
-) {
-    val themeColors = MaterialTheme.styles
-    val radius = MaterialTheme.radius
-    var showCalendarPopup by remember { mutableStateOf(false) }
-
-    val positionProvider = rememberAnchoredPopupPositionProvider()
-
-    val formatter = dateTimeFormat ?: DateFormatter.ofPattern("MMM dd, yyyy")
-    val formattedRange = selectedRange?.let {
-        "${formatter.format(it.start)} - ${formatter.format(it.end)}"
-    }
-
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val currentBorderColor by animateColorAsState(
-        targetValue = if (isFocused || isPressed || showCalendarPopup) themeColors.ring else themeColors.border,
-        animationSpec = tween(150), label = "dateRangePickerBorderColor"
-    )
-
-    Column(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .clip(RoundedCornerShape(radius.md))
-                .border(1.dp, currentBorderColor, RoundedCornerShape(radius.md))
-                .komoClickable(
-                    onClick = { showCalendarPopup = !showCalendarPopup },
-                    role = Role.DropdownList,
-                    shape = RoundedCornerShape(radius.md),
-                    stateDescription = if (showCalendarPopup) "Expanded" else "Collapsed",
-                    interactionSource = interactionSource,
-                )
-                .padding(horizontal = 12.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                if (leadingIcon != null) {
-                    leadingIcon()
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text(
-                    text = formattedRange ?: placeholder,
-                    color = if (selectedRange != null) themeColors.foreground else themeColors.mutedForeground,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f)
-                )
-                if (trailingIcon != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    trailingIcon()
-                }
-            }
-        }
-
-        // Calendar Popup
-        if (showCalendarPopup) {
-            Popup(
-                popupPositionProvider = positionProvider,
-                properties = PopupProperties(focusable = true),
-                onDismissRequest = { showCalendarPopup = false }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(radius.md))
-                        .background(themeColors.popover)
-                ) {
-                    Calendar(
-                        selectionMode = CalendarSelectionMode.Range(
-                            selectedRange = selectedRange,
-                            onRangeSelected = { range ->
-                                onRangeSelected(range)
-                                showCalendarPopup = false
-                            }
-                        ),
-                        initialMonth = selectedRange?.start?.let { YearMonth.from(it) } ?: YearMonth.now(),
-                        dateSelectionMode = dateSelectionMode,
-                        colors = colors
-                    )
+                    popover { showCalendarPopup = false }
                 }
             }
         }
