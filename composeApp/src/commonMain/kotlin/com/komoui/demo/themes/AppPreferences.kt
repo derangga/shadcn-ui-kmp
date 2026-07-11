@@ -1,36 +1,29 @@
 package com.komoui.demo.themes
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
 
-suspend fun DataStore<Preferences>.setTheme(theme: String) {
-    edit { dataStore ->
-        val key = stringPreferencesKey("theme")
-        dataStore[key] = theme
-    }
+interface AppPreferences {
+    val theme: Flow<String>
+    val styles: Flow<String>
+
+    suspend fun setTheme(theme: String)
+
+    suspend fun setStyles(styles: String)
 }
 
-fun DataStore<Preferences>.getTheme(): Flow<String> {
-    return data.map {
-        val key = stringPreferencesKey("theme")
-        it[key] ?: "system"
-    }
-}
+class InMemoryAppPreferences : AppPreferences {
+    private val themeState = MutableStateFlow("system")
+    private val stylesState = MutableStateFlow("Default")
 
-suspend fun DataStore<Preferences>.setStyles(styles: String) {
-    edit { dataStore ->
-        val key = stringPreferencesKey("styles")
-        dataStore[key] = styles
-    }
-}
+    override val theme: Flow<String> = themeState
+    override val styles: Flow<String> = stylesState
 
-fun DataStore<Preferences>.getStyles(): Flow<String> {
-    return data.map {
-        val key = stringPreferencesKey("styles")
-        it[key] ?: "Default"
+    override suspend fun setTheme(theme: String) {
+        themeState.value = theme
+    }
+
+    override suspend fun setStyles(styles: String) {
+        stylesState.value = styles
     }
 }

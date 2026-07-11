@@ -1,20 +1,23 @@
 package com.komoui.demo
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.komoui.demo.themes.AppPreferences
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import okio.Path.Companion.toPath
 
-fun createDataStore(context: Context): AppPreferences = DataStoreAppPreferences(
+fun createDataStore(): AppPreferences = DataStoreAppPreferences(
     PreferenceDataStoreFactory.createWithPath(
         produceFile = {
-            context.filesDir.resolve(DATA_STORE_FILE_NAME).absolutePath.toPath()
+            File(System.getProperty("user.home"), ".komoui/$DATA_STORE_FILE_NAME")
+                .also { it.parentFile?.mkdirs() }
+                .absolutePath
+                .toPath()
         }
     )
 )

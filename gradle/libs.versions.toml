@@ -13,8 +13,8 @@ componentsResources = "1.10.2"
 composeMultiplatform = "1.10.2"
 foundation = "1.10.2"
 junit = "4.13.2"
-kotlin = "2.2.20"
-kotlinStdlib = "2.2.20"
+kotlin = "2.2.21"
+kotlinStdlib = "2.2.21"
 kotlinDatetime = "0.7.1"
 material3 = "1.9.0"
 runner = "1.5.2"
@@ -58,7 +58,9 @@ coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil"
 coil-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
 
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
+ktor-client-js = { group = "io.ktor", name = "ktor-client-js", version.ref = "ktor" }
 
 androidx-material-icons-extended = { group = "org.jetbrains.compose.material", name = "material-icons-extended", version.ref = "androidx-material-icons-extended" }
 androidx-compose-navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "androidx-compose-navigation" }
